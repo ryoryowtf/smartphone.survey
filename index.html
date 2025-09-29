@@ -69,13 +69,16 @@
     </div>
   </div>
 
-  <!-- ストループ課題 -->
-  <div id="stroop-section" class="hidden">
-    <p>説明文：画面に色の名前が表示されます。文字の色（表示色）を答えてください。意味（文字の読み）ではなく、表示色を選んでください。なるべく素早く回答してください。</p>
-    <button onclick="startStroopTest()">ストループ課題開始</button>
-    <div id="stroop-display" style="font-size:24px; margin:20px 0;"></div>
-    <input type="text" id="stroop-answer" class="hidden">
-    <button id="stroop-submit" class="hidden" onclick="submitStroopAnswer()">回答</button>
+ <!-- ストループ課題 -->
+<div id="stroop-section" class="hidden">
+  <p>説明文：画面に色の名前が表示されます。文字の色（表示色）を答えてください。意味（文字の読み）ではなく、表示色を選んでください。なるべく素早く回答してください。</p>
+  <button onclick="startStroopTest()">ストループ課題開始</button>
+  <div id="stroop-display" style="font-size:24px; margin:20px 0;"></div>
+  <div id="stroop-options" class="hidden">
+    <button onclick="submitStroopAnswer('red')">赤</button>
+    <button onclick="submitStroopAnswer('blue')">青</button>
+    <button onclick="submitStroopAnswer('green')">緑</button>
+    <button onclick="submitStroopAnswer('yellow')">黄</button>
   </div>
 </div>
 
@@ -164,6 +167,13 @@ function startStroopTest() {
   showStroopTrial();
 }
 
+// ストループ課題開始
+function startStroopTest() {
+  stroopIndex = 0; stroopTimes = []; stroopCorrect = 0;
+  document.getElementById("stroop-options").classList.remove("hidden");
+  showStroopTrial();
+}
+
 // ストループ課題表示
 function showStroopTrial() {
   if(stroopIndex >= stroopTrials.length){
@@ -175,20 +185,19 @@ function showStroopTrial() {
   const display = document.getElementById("stroop-display");
   display.textContent = trial.word;
   display.style.color = trial.color;
-  document.getElementById("stroop-answer").value = "";
   stroopStartTime = performance.now();
 }
 
-// 回答送信
-function submitStroopAnswer() {
-  const answer = document.getElementById("stroop-answer").value.trim().toLowerCase();
-  const correct = stroopTrials[stroopIndex].color.toLowerCase();
+// 回答送信（選択肢ボタン用）
+function submitStroopAnswer(selectedColor) {
+  const trial = stroopTrials[stroopIndex];
   const timeTaken = (performance.now() - stroopStartTime)/1000;
   stroopTimes.push(timeTaken);
-  if(answer === correct) stroopCorrect++;
+  if(selectedColor.toLowerCase() === trial.color.toLowerCase()) stroopCorrect++;
   stroopIndex++;
   showStroopTrial();
 }
+
 
 // CSVダウンロード
 function downloadCSV() {
