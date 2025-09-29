@@ -1,213 +1,227 @@
 <!DOCTYPE html>
 <html lang="ja">
 <head>
-  <meta charset="UTF-8">
-  <title>スマホ利用と認知能力調査</title>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.23/jspdf.plugin.autotable.min.js"></script>
-  <!-- IPAexフォントをBase64で埋め込み -->
-  <script src="https://unpkg.com/jspdf-font-ipaex@1.0.2/ipaexg.js"></script>
-  <style>
-    body { font-family: sans-serif; margin: 20px; }
-    .hidden { display: none; }
-    button { margin-top: 10px; padding: 6px 12px; }
-    input, textarea { width: 300px; margin: 4px 0; }
-  </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>高校生スマホ利用と認知能力調査</title>
+<style>
+  body { font-family: Arial, sans-serif; padding: 20px; background-color: #f2f2f2; }
+  h2, h3 { color: #333; }
+  .section { background: #fff; padding: 20px; margin-bottom: 20px; border-radius: 10px; box-shadow: 0 0 5px #ccc; }
+  button { padding: 10px 20px; font-size: 16px; margin-top: 10px; }
+  input[type="number"], input[type="text"] { margin-left: 5px; }
+  .hidden { display: none; }
+  label { display: block; margin: 10px 0; }
+</style>
 </head>
 <body>
 
-<p>このアンケートは、高校生のスマホ利用と認知能力の関係に関する調査に使われます。※数分の時間を要します。</p>
-<button onclick="startSurvey()">アンケートを開始</button>
+<h2>高校生スマホ利用と認知能力に関する調査</h2>
 
-<div id="survey1" class="hidden">
-  <h3>調査１　アンケート調査</h3>
-  <label>(1) 平日のスマートフォン利用時間：<input type="number" id="weekdayHours"> 時間</label><br>
-  <label>(2) 休日のスマートフォン利用時間：<input type="number" id="weekendHours"> 時間</label><br>
-  <label>(3) スマートフォン機能の利用頻度順：<input type="text" id="functionOrder" placeholder="例: 2,1,3,4,5,6"></label><br>
-  <label>(4) その他の利用方法：<br><textarea id="otherUsage"></textarea></label><br>
-  <label>(5) 一日の平均睡眠時間：<input type="number" id="sleepHours"> 時間</label><br>
-  <p>入力が完了したら以下のボタンを押してください。</p>
-  <button onclick="finishSurvey1()">入力完了</button>
+<div id="start-section" class="section">
+  <p>このアンケートは、高校生のスマホ利用と認知能力の関係に関する調査に使われます。※数分の時間を要します。</p>
+  <button onclick="startSurvey()">アンケートを開始</button>
 </div>
 
-<div id="wordTest" class="hidden">
-  <h3>調査２ 認知能力テスト (1) 単語リスト再生</h3>
-  <p>これから、15個の単語が順番に表示されます。それらを順番に1~15の欄にできるだけ記入してください。<br>
-  メモを取らないようにお願いします。解答が終わったら「解答完了」を押してください。</p>
-  <div id="wordDisplay"></div>
-  <div id="wordAnswer" class="hidden">
-    <div id="wordInputs"></div>
-    <button onclick="finishWordTest()">解答完了</button>
+<!-- 調査1 -->
+<div id="survey1-section" class="section hidden">
+  <h3>調査１　アンケート調査</h3>
+  <label>1. スマートフォンを平日にどれだけ利用しますか。 ()時間
+    <input type="number" id="weekdayHours" min="0">
+  </label>
+  <label>2. スマートフォンを休日にどれだけ利用しますか。 ()時間
+    <input type="number" id="weekendHours" min="0">
+  </label>
+  <label>3. スマートフォンをどのような機能を利用しますか。使う頻度が多い順に番号を例のように入力してください。なお、全く使わない機能があれば、記入する必要はありません。例：2,1,3,4,5,6
+    <input type="text" id="functionOrder">
+  </label>
+  <ul>
+    <li>1. SNS(LINE,Instagram,X等)</li>
+    <li>2. 動画視聴(勉強と関わりのないもの)</li>
+    <li>3. ゲーム</li>
+    <li>4. 勉強・調べもの</li>
+    <li>5. 読書・ニュース閲覧</li>
+    <li>6. ショッピング</li>
+    <li>7. 通話・メッセージ</li>
+  </ul>
+  <label>4. 上記以外の利用方法を使っていたら記入してください。
+    <input type="text" id="otherUsage">
+  </label>
+  <label>5. 一日の平均的な睡眠時間を入力してください。 ()時間
+    <input type="number" id="sleepHours" min="0">
+  </label>
+  <p>入力が完了したら、以下のボタンを押してください。</p>
+  <button onclick="completeSurvey1()">入力完了</button>
+</div>
+
+<!-- 調査2 -->
+<div id="survey2-section" class="section hidden">
+  <h3>調査２ 認知能力テスト</h3>
+
+  <!-- 単語リスト再生 -->
+  <div id="word-test-section">
+    <p>これから、15個の単語が順番に表示されます。それらを順番に1~15の欄にできるだけ記入してください。メモを取らないようにお願いします。解答が終わったら、解答完了のボタンを押してください。</p>
+    <button onclick="startWordTest()">単語テスト開始</button>
+    <div id="word-display" style="font-size:24px; margin:20px 0;"></div>
+    <div id="word-input-section" class="hidden">
+      <div id="word-inputs"></div>
+      <button onclick="completeWordTest()">解答完了</button>
+    </div>
+  </div>
+
+  <!-- ストループ課題 -->
+<div id="stroop-section" class="hidden">
+  <p>画面に色の名前が表示されます。文字の色（表示色）を答えてください。意味（文字の読み）ではなく、表示色を選んでください。なるべく素早く回答してください。</p>
+  <button onclick="startStroopTest()">ストループ課題開始</button>
+  <div id="stroop-display" style="font-size:24px; margin:20px 0;"></div>
+  <div id="stroop-options" class="hidden">
+    <button onclick="submitStroopAnswer('red')">赤</button>
+    <button onclick="submitStroopAnswer('blue')">青</button>
+    <button onclick="submitStroopAnswer('green')">緑</button>
+    <button onclick="submitStroopAnswer('yellow')">黄</button>
   </div>
 </div>
 
-<div id="stroopTest" class="hidden">
-  <h3>調査２ 認知能力テスト (2) ストループ課題</h3>
-  <p>画面に色の名前が表示されます。文字の色（表示色）を答えてください。<br>
-  意味（文字の読み）ではなく、表示色を選んでください。なるべく素早く回答してください。</p>
-  <div id="stroopQuestion" style="font-size:24px; margin:20px;"></div>
-  <div id="stroopChoices"></div>
-</div>
 
-<div id="endMessage" class="hidden">
-  <h3>説明文</h3>
-  <p>テストは以上です。お手数ですが、ダウンロードされたPDFファイルをLINEで送信していただけると、情報収集ができ助かります。ご協力をおねがいします。</p>
-  <button onclick="downloadPDF()">PDFをダウンロード</button>
+<!-- CSV ダウンロード -->
+<div id="download-section" class="section hidden">
+  <p>テストは以上です。お手数ですが、ダウンロードされたcsvファイルをLINEで送信していただけると、情報収集ができ助かります。ご協力をおねがいします。</p>
+  <button onclick="downloadCSV()">CSVをダウンロード</button>
 </div>
 
 <script>
 let survey1Data = {};
-let wordList = ["犬","机","空","山","水","音","夢","花","月","本","海","道","鳥","手","光"];
+let wordList = ["猫","犬","車","家","学校","本","花","川","山","海","鳥","魚","時計","机","椅子"];
 let wordAnswers = [];
-let correctWords = 0;
-
-let stroopTrials = [];
+let stroopTrials = [
+  {word:"赤", color:"blue"}, {word:"青", color:"red"},
+  {word:"緑", color:"yellow"}, {word:"黄", color:"green"},
+  {word:"赤", color:"green"}, {word:"青", color:"yellow"},
+  {word:"緑", color:"red"}, {word:"黄", color:"blue"},
+  {word:"赤", color:"yellow"}, {word:"青", color:"green"}
+];
+let stroopIndex = 0;
+let stroopStartTime = 0;
 let stroopTimes = [];
 let stroopCorrect = 0;
-let currentTrial = 0;
-let startTime;
 
-function startSurvey(){
-  document.querySelector("button").style.display="none";
-  document.getElementById("survey1").classList.remove("hidden");
+// 開始
+function startSurvey() {
+  document.getElementById("start-section").classList.add("hidden");
+  document.getElementById("survey1-section").classList.remove("hidden");
 }
 
-function finishSurvey1(){
+// 調査1完了
+function completeSurvey1() {
   survey1Data.weekdayHours = document.getElementById("weekdayHours").value;
   survey1Data.weekendHours = document.getElementById("weekendHours").value;
   survey1Data.functionOrder = document.getElementById("functionOrder").value;
   survey1Data.otherUsage = document.getElementById("otherUsage").value;
   survey1Data.sleepHours = document.getElementById("sleepHours").value;
 
-  document.getElementById("survey1").classList.add("hidden");
-  document.getElementById("wordTest").classList.remove("hidden");
-
-  showWords();
+  document.getElementById("survey1-section").classList.add("hidden");
+  document.getElementById("survey2-section").classList.remove("hidden");
 }
 
-function showWords(){
-  let i=0;
-  let display=document.getElementById("wordDisplay");
-  let interval=setInterval(()=>{
-    display.textContent=wordList[i];
-    i++;
-    if(i>=wordList.length){
-      clearInterval(interval);
-      setTimeout(()=>{
-        display.textContent="";
-        let inputs=document.getElementById("wordInputs");
-        inputs.innerHTML="";
-        for(let j=0;j<15;j++){
-          inputs.innerHTML+=`${j+1}番目: <input type="text" id="ans${j}"><br>`;
-        }
-        document.getElementById("wordAnswer").classList.remove("hidden");
-      },5000);
+// 単語テスト開始
+function startWordTest() {
+  document.getElementById("word-display").textContent = "";
+  let i = 0;
+  function showNextWord() {
+    if(i < wordList.length){
+      document.getElementById("word-display").textContent = wordList[i];
+      i++;
+      setTimeout(showNextWord, 2000);
+    } else {
+      document.getElementById("word-display").textContent = "";
+      showWordInputs();
     }
-  },2000);
-}
-
-function finishWordTest(){
-  wordAnswers=[];
-  for(let i=0;i<15;i++){
-    let val=document.getElementById("ans"+i).value.trim();
-    wordAnswers.push(val);
   }
-  correctWords=wordAnswers.filter((w,i)=>w===wordList[i]).length;
-  document.getElementById("wordTest").classList.add("hidden");
-  document.getElementById("stroopTest").classList.remove("hidden");
-  startStroop();
+  showNextWord();
 }
 
-function startStroop(){
-  stroopTrials=[
-    {text:"赤",color:"blue"},
-    {text:"青",color:"green"},
-    {text:"緑",color:"red"},
-    {text:"黄",color:"purple"},
-    {text:"黒",color:"orange"},
-    {text:"紫",color:"red"},
-    {text:"橙",color:"green"},
-    {text:"白",color:"black"},
-    {text:"水",color:"brown"},
-    {text:"茶",color:"pink"}
-  ];
+// 単語入力欄表示
+function showWordInputs() {
+  const container = document.getElementById("word-inputs");
+  container.innerHTML = "";
+  for(let i=0;i<15;i++){
+    container.innerHTML += ` ${i+1}番目：<input type="text" id="word${i}"><br>`;
+  }
+  document.getElementById("word-input-section").classList.remove("hidden");
+}
+
+// 単語テスト完了
+function completeWordTest() {
+  wordAnswers = [];
+  for(let i=0;i<15;i++){
+    wordAnswers.push(document.getElementById(`word${i}`).value.trim());
+  }
+  document.getElementById("word-test-section").classList.add("hidden");
+  document.getElementById("stroop-section").classList.remove("hidden");
+}
+
+// ストループ課題開始
+function startStroopTest() {
+  stroopIndex = 0; stroopTimes = []; stroopCorrect = 0;
+  document.getElementById("stroop-options").classList.remove("hidden");
   showStroopTrial();
 }
 
-function showStroopTrial(){
-  if(currentTrial>=stroopTrials.length){
-    document.getElementById("stroopTest").classList.add("hidden");
-    document.getElementById("endMessage").classList.remove("hidden");
+// ストループ課題表示
+function showStroopTrial() {
+  if(stroopIndex >= stroopTrials.length){
+    document.getElementById("stroop-section").classList.add("hidden");
+    document.getElementById("download-section").classList.remove("hidden");
     return;
   }
-  let trial=stroopTrials[currentTrial];
-  let q=document.getElementById("stroopQuestion");
-  q.textContent=trial.text;
-  q.style.color=trial.color;
-  let choices=["red","blue","green","yellow","purple","orange","black","white","brown","pink"];
-  let buttons=document.getElementById("stroopChoices");
-  buttons.innerHTML="";
-  choices.forEach(c=>{
-    let b=document.createElement("button");
-    b.textContent=c;
-    b.onclick=()=>checkStroop(c);
-    buttons.appendChild(b);
-  });
-  startTime=new Date();
+  const trial = stroopTrials[stroopIndex];
+  const display = document.getElementById("stroop-display");
+  display.textContent = trial.word;
+  display.style.color = trial.color;
+  stroopStartTime = performance.now();
 }
 
-function checkStroop(answer){
-  let trial=stroopTrials[currentTrial];
-  let end=new Date();
-  stroopTimes.push((end-startTime)/1000);
-  if(answer===trial.color) stroopCorrect++;
-  currentTrial++;
+// 回答送信（選択肢ボタン用）
+function submitStroopAnswer(selectedColor) {
+  const trial = stroopTrials[stroopIndex];
+  const timeTaken = (performance.now() - stroopStartTime)/1000;
+  stroopTimes.push(timeTaken);
+  if(selectedColor.toLowerCase() === trial.color.toLowerCase()) stroopCorrect++;
+  stroopIndex++;
   showStroopTrial();
 }
 
-function downloadPDF(){
-  const { jsPDF } = window.jspdf;
-  const doc = new jsPDF();
-  doc.setFont("ipaexg","normal");
 
-  doc.setFontSize(16);
-  doc.text("調査結果", 14, 20);
+// CSVダウンロード
+function downloadCSV() {
+  let csv = "調査1項目,回答\n";
+  csv += `平日利用時間,${survey1Data.weekdayHours}\n`;
+  csv += `休日利用時間,${survey1Data.weekendHours}\n`;
+  csv += `スマホ機能頻度順,${survey1Data.functionOrder}\n`;
+  csv += `その他利用,${survey1Data.otherUsage}\n`;
+  csv += `睡眠時間,${survey1Data.sleepHours}\n\n`;
 
-  doc.setFontSize(12);
-  doc.text("調査１ アンケート調査", 14, 30);
-  doc.autoTable({
-    startY: 35,
-    head: [["項目", "回答"]],
-    body: [
-      ["平日利用時間", survey1Data.weekdayHours+"時間"],
-      ["休日利用時間", survey1Data.weekendHours+"時間"],
-      ["機能利用順序", survey1Data.functionOrder],
-      ["その他利用", survey1Data.otherUsage],
-      ["睡眠時間", survey1Data.sleepHours+"時間"]
-    ]
+  csv += "単語テスト,回答\n";
+  for(let i=0;i<15;i++){
+    csv += `${i+1}番目,${wordAnswers[i]}\n`;
+  }
+  const correctWords = wordAnswers.filter((w,i)=>w===wordList[i]).length;
+  csv += `正答率,${(correctWords/15*100).toFixed(1)}%\n\n`;
+
+  csv += "ストループ課題,試行時間(s)\n";
+  stroopTimes.forEach((t,i)=>{
+    csv += `Trial${i+1},${t.toFixed(2)}\n`;
   });
+  csv += `正答率,${(stroopCorrect/stroopTrials.length*100).toFixed(1)}%\n`;
 
-  doc.text("調査２-1 単語リスト再生", 14, doc.lastAutoTable.finalY + 10);
-  let wordBody = wordAnswers.map((w,i)=>[`${i+1}番目`, w]);
-  wordBody.push(["正答率", `${(correctWords/15*100).toFixed(1)}%`]);
-  doc.autoTable({
-    startY: doc.lastAutoTable.finalY + 15,
-    head: [["番号", "解答"]],
-    body: wordBody
-  });
-
-  doc.text("調査２-2 ストループ課題", 14, doc.lastAutoTable.finalY + 10);
-  let stroopBody = stroopTimes.map((t,i)=>[`試行${i+1}`, t.toFixed(2)+"秒"]);
-  stroopBody.push(["正答率", `${(stroopCorrect/stroopTrials.length*100).toFixed(1)}%`]);
-  doc.autoTable({
-    startY: doc.lastAutoTable.finalY + 15,
-    head: [["試行", "反応時間"]],
-    body: stroopBody
-  });
-
-  doc.save("survey_results.pdf");
+  const blob = new Blob([csv], {type: 'text/csv'});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = "survey_results.csv";
+  a.click();
 }
 </script>
+
 </body>
 </html>
-```
