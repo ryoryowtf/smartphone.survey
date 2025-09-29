@@ -201,26 +201,30 @@ function submitStroopAnswer(selectedColor) {
 
 // CSVダウンロード
 function downloadCSV() {
-  let csv = "\uFEFF"; // BOMを追加
-  csv += "調査1項目,回答\n";
-  csv += `平日利用時間,${survey1Data.weekdayHours}\n`;
-  csv += `休日利用時間,${survey1Data.weekendHours}\n`;
-  csv += `スマホ機能頻度順,${survey1Data.functionOrder}\n`;
-  csv += `その他利用,${survey1Data.otherUsage}\n`;
-  csv += `睡眠時間,${survey1Data.sleepHours}\n\n`;
+  let csv = ""; // UTF-8でもOK（英語のみ）
+  
+  // Survey 1
+  csv += "Survey1 Item,Answer\n";
+  csv += `Weekday smartphone usage (hours),${survey1Data.weekdayHours}\n`;
+  csv += `Weekend smartphone usage (hours),${survey1Data.weekendHours}\n`;
+  csv += `Smartphone function frequency order,${survey1Data.functionOrder}\n`;
+  csv += `Other usage,${survey1Data.otherUsage}\n`;
+  csv += `Average sleep hours,${survey1Data.sleepHours}\n\n`;
 
-  csv += "単語テスト,回答\n";
+  // Word memory test
+  csv += "Word Test,Answer\n";
   for(let i=0;i<15;i++){
-    csv += `${i+1}番目,${wordAnswers[i]}\n`;
+    csv += `Word ${i+1},${wordAnswers[i]}\n`;
   }
   const correctWords = wordAnswers.filter((w,i)=>w===wordList[i]).length;
-  csv += `正答率,${(correctWords/15*100).toFixed(1)}%\n\n`;
+  csv += `Word Test Accuracy,${(correctWords/15*100).toFixed(1)}%\n\n`;
 
-  csv += "ストループ課題,試行時間(s)\n";
+  // Stroop task
+  csv += "Stroop Task,ReactionTime(s)\n";
   stroopTimes.forEach((t,i)=>{
-    csv += `Trial${i+1},${t.toFixed(2)}\n`;
+    csv += `Trial ${i+1},${t.toFixed(2)}\n`;
   });
-  csv += `正答率,${(stroopCorrect/stroopTrials.length*100).toFixed(1)}%\n`;
+  csv += `Stroop Accuracy,${(stroopCorrect/stroopTrials.length*100).toFixed(1)}%\n`;
 
   const blob = new Blob([csv], {type: 'text/csv;charset=utf-8'});
   const url = URL.createObjectURL(blob);
@@ -229,6 +233,7 @@ function downloadCSV() {
   a.download = "survey_results.csv";
   a.click();
 }
+
 </script>
 
 </body>
