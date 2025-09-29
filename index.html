@@ -201,7 +201,8 @@ function submitStroopAnswer(selectedColor) {
 
 // CSVダウンロード
 function downloadCSV() {
-  let csv = "調査1項目,回答\n";
+  let csv = "\uFEFF"; // BOMを追加
+  csv += "調査1項目,回答\n";
   csv += `平日利用時間,${survey1Data.weekdayHours}\n`;
   csv += `休日利用時間,${survey1Data.weekendHours}\n`;
   csv += `スマホ機能頻度順,${survey1Data.functionOrder}\n`;
@@ -221,7 +222,7 @@ function downloadCSV() {
   });
   csv += `正答率,${(stroopCorrect/stroopTrials.length*100).toFixed(1)}%\n`;
 
-  const blob = new Blob([csv], {type: 'text/csv'});
+  const blob = new Blob([csv], {type: 'text/csv;charset=utf-8'});
   const url = URL.createObjectURL(blob);
   const a = document.createElement('a');
   a.href = url;
