@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>高校生スマホ利用と認知能力調査</title>
-<style>
+
   body { font-family: Arial, sans-serif; padding: 20px; background-color: #f2f2f2; }
   h2, h3 { color: #333; }
   .section { background: #fff; padding: 20px; margin-bottom: 20px; border-radius: 10px; box-shadow: 0 0 5px #ccc; }
@@ -220,6 +220,74 @@ function downloadCSV() {
   a.href = url;
   a.download = "survey_results.csv";
   a.click();
+}
+</script>
+
+<!-- jsPDF ライブラリを読み込み -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.25/jspdf.plugin.autotable.min.js"></script>
+
+<script>
+// PDF ダウンロード
+function downloadCSV(){
+  const { jsPDF } = window.jspdf;
+  const doc = new jsPDF();
+
+  // タイトル
+  doc.setFontSize(16);
+  doc.text("高校生スマホ利用と認知能力調査 結果", 10, 10);
+
+  // アンケート結果
+  doc.setFontSize(12);
+  doc.text("【アンケート回答】", 10, 20);
+  const surveyData = [
+    ["平日の利用時間", survey1Data.weekdayHours + " 時間"],
+    ["休日の利用時間", survey1Data.weekendHours + " 時間"],
+    ["利用機能の順序", survey1Data.functionOrder],
+    ["その他の利用", survey1Data.otherUsage],
+    ["平均睡眠時間", survey1Data.sleepHours + " 時間"]
+  ];
+  doc.autoTable({ startY: 25, head:[["質問","回答"]], body: surveyData });
+
+  // 単語テスト結果
+  let correctCount = 0;
+  for(let i=0;i<wordList.length;i++){
+    if(wordAnswers[i] === wordList[i]) correctCount++;
+  }
+  const accuracy = ((correctCount / wordList.length) * 100).toFixed(1);
+
+  doc.text("【単語リスト再生テスト】", 10, doc.lastAutoTable.finalY + 10);
+  let wordTable = [];
+  for(let i=0;i<wordList.length;i++){
+    wordTable.push([ (i+1)+"番目", wordList[i], wordAnswers[i] || "", wordAnswers[i]===wordList[i] ? "○" : "×" ]);
+  }
+  doc.autoTable({
+    startY: doc.lastAutoTable.finalY + 15,
+    head:[["番号","正解単語","回答","正誤"]],
+    body: wordTable
+  });
+  doc.text(`正答率：${accuracy}%`, 10, doc.lastAutoTable.finalY + 10);
+
+  // ストループ課題結果
+  doc.text("【ストループ課題】", 10, doc.lastAutoTable.finalY + 20);
+  let stroopTable = [];
+  for(let i=0;i<stroopTrials.length;i++){
+    stroopTable.push([
+      i+1,
+      stroopTrials[i].word,
+      stroopTrials[i].color,
+      stroopTimes[i].toFixed(2)+" 秒",
+      (stroopTrials[i].color.toLowerCase() === (wordAnswers[i]? wordAnswers[i].toLowerCase() : "") ? "○":"")
+    ]);
+  }
+  doc.autoTable({
+    startY: doc.lastAutoTable.finalY + 25,
+    head:[["試行","表示単語","正解色","反応時間","正誤"]],
+    body: stroopTable
+  });
+
+  // 保存
+  doc.save("survey_result.pdf");
 }
 </script>
 
