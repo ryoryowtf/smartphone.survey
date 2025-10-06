@@ -1,317 +1,48 @@
 <!DOCTYPE html>
 <html lang="ja">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>高校生スマホ利用と認知能力調査</title>
-<style>
-  body { font-family: "Hiragino Sans", sans-serif; background:#f4f6f8; margin:0; padding:0; }
-  .container { max-width:800px; margin:0 auto; padding:20px; background:#fff; box-shadow:0 4px 10px rgba(0,0,0,0.1); border-radius:12px; margin-top:20px; }
-  h2 { color:#2c3e50; }
-  button { background:#3498db; color:#fff; border:none; padding:12px 20px; margin-top:15px; border-radius:8px; font-size:16px; cursor:pointer; }
-  button:hover { background:#2980b9; }
-  .hidden { display:none; }
-  .question { margin:15px 0; }
-  input, textarea { padding:8px; font-size:15px; width:90%; margin-top:5px; }
-  .word { font-size:24px; font-weight:bold; text-align:center; margin:40px 0; }
-  .stroop { font-size:36px; font-weight:bold; text-align:center; margin:40px 0; }
-  .result-table { border-collapse:collapse; width:100%; margin-top:20px; }
-  .result-table th, .result-table td { border:1px solid #ddd; padding:8px; text-align:center; }
-</style>
+  <meta charset="UTF-8">
+  <title>PDFテスト</title>
+  <!-- jsPDF & autoTable 読み込み -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.28/jspdf.plugin.autotable.min.js"></script>
 </head>
 <body>
-<div class="container">
-  <h2>高校生スマホ利用と認知能力調査</h2>
-  <p>このアンケートは、高校生のスマホ利用と認知能力の関係に関する調査に使われます。<br>※数分の時間を要します。</p>
-  <button id="startBtn">アンケートを開始する</button>
+  <h2>PDF出力テスト</h2>
+  <button onclick="downloadPDF()">PDFをダウンロード</button>
 
-  <!-- 調査1 アンケート -->
-  <div id="survey1" class="hidden">
-    <h2>調査1 アンケート調査</h2>
-    <div class="question">(1) 平日のスマホ利用時間 <br> ( <input id="weekday" type="number"> ) 時間</div>
-    <div class="question">(2) 休日のスマホ利用時間 <br> ( <input id="holiday" type="number"> ) 時間</div>
-    <div class="question">(3) スマホの利用機能（頻度順に番号を並べて記入）<br>
-      1.SNS 2.動画視聴 3.ゲーム 4.勉強・調べもの 5.読書・ニュース 6.ショッピング 7.通話・メッセージ<br>
-      <input id="functions" type="text" placeholder="例：2,1,3,4,5,6">
-    </div>
-    <div class="question">(4) その他の利用方法<br><textarea id="other"></textarea></div>
-    <div class="question">(5) 一日の平均的な睡眠時間 <br> ( <input id="sleep" type="number"> ) 時間</div>
-    <button id="survey1Done">入力完了</button>
-  </div>
+  <script>
+  function downloadPDF() {
+    const { jsPDF } = window.jspdf;
+    const doc = new jsPDF();
 
-  <!-- 調査2 認知能力テスト -->
-  <div id="survey2" class="hidden">
-    <h2>調査2 認知能力テスト</h2>
-    <p>次に、認知能力に関するテストを行います。</p>
-    <button id="wordTestBtn">単語リスト再生テストを開始</button>
-  </div>
+    doc.setFontSize(16);
+    doc.text("アンケート結果", 14, 20);
 
-  <!-- 単語テスト -->
-  <div id="wordTest" class="hidden">
-    <h3>単語リスト再生テスト</h3>
-    <div id="wordDisplay" class="word"></div>
-    <div id="wordAnswer" class="hidden">
-      <p>覚えた単語を順番に入力してください。</p>
-      <div id="wordInputs"></div>
-      <button id="wordDone">解答完了</button>
-    </div>
-  </div>
+    // ダミーデータ
+    const results = {
+      wordAccuracy: 80,
+      stroopAvgTime: 1234,
+      stroopAccuracy: 92,
+      wordAnswers: ["apple", "banana", "orange"]
+    };
 
-  <!-- ストループ課題 -->
-  <div id="stroopTest" class="hidden">
-    <h3>ストループ課題</h3>
-    <p>表示された「文字の色」を答えてください。（意味ではなく色）</p>
-    <div id="stroopDisplay" class="stroop"></div>
-    <div id="colorButtons"></div>
-  </div>
+    const tableData = [
+      ["項目", "結果"],
+      ["単語リスト正答率", results.wordAccuracy + "%"],
+      ["ストループ課題平均反応時間", results.stroopAvgTime + " ms"],
+      ["ストループ課題正答率", results.stroopAccuracy + "%"],
+      ["単語テスト回答内容", results.wordAnswers.join(", ")]
+    ];
 
-  <!-- 最終結果 -->
-  <div id="finalResult" class="hidden">
-    <h2>テストは以上です。ご協力ありがとうございました。</h2>
-    <p>結果がPDFファイルとして出力されます。</p>
-    <button id="downloadPDF">PDFをダウンロード</button>
-  </div>
-</div>
+    doc.autoTable({
+      head: [tableData[0]],
+      body: tableData.slice(1),
+      startY: 30
+    });
 
-<!-- jsPDF本体 -->
-<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
-<!-- 日本語フォント -->
-<script src="https://unpkg.com/jspdf-font-noto-sans-jp"></script>
-<!-- 表出力用 -->
-<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.28/jspdf.plugin.autotable.min.js"></script>
-<script>
-const { jsPDF } = window.jspdf;
-
-let surveyData = {};
-let wordList = ["りんご","バナナ","時計","花","机","ペン","山","川","本","窓","車","鳥","月","犬","靴"];
-let wordAnswers = [];
-let stroopResults = [];
-let currentWord = 0;
-let currentStroop = 0;
-let stroopStartTime = 0;
-let colors = ["赤","青","緑","黄"];
-let colorCodes = ["red","blue","green","orange"];
-
-// --- UI制御 ---
-document.getElementById("startBtn").onclick = () => {
-  document.getElementById("startBtn").classList.add("hidden");
-  document.getElementById("survey1").classList.remove("hidden");
-};
-
-// 調査1完了
-document.getElementById("survey1Done").onclick = () => {
-  surveyData.weekday = document.getElementById("weekday").value;
-  surveyData.holiday = document.getElementById("holiday").value;
-  surveyData.functions = document.getElementById("functions").value;
-  surveyData.other = document.getElementById("other").value;
-  surveyData.sleep = document.getElementById("sleep").value;
-  document.getElementById("survey1").classList.add("hidden");
-  document.getElementById("survey2").classList.remove("hidden");
-};
-
-// 単語テスト開始
-document.getElementById("wordTestBtn").onclick = () => {
-  document.getElementById("survey2").classList.add("hidden");
-  document.getElementById("wordTest").classList.remove("hidden");
-  showWords();
-};
-
-// 単語提示
-function showWords(){
-  let display = document.getElementById("wordDisplay");
-  currentWord = 0;
-  let interval = setInterval(()=>{
-    if(currentWord < wordList.length){
-      display.textContent = wordList[currentWord];
-      currentWord++;
-    } else {
-      clearInterval(interval);
-      display.textContent = "";
-      setTimeout(showWordInputs, 5000);
-    }
-  },2000);
-}
-
-// 解答欄
-function showWordInputs(){
-  let area = document.getElementById("wordInputs");
-  area.innerHTML = "";
-  for(let i=1;i<=15;i++){
-    area.innerHTML += i+"番目: <input type='text' id='ans"+i+"'><br>";
+    doc.save("results.pdf");
   }
-  document.getElementById("wordAnswer").classList.remove("hidden");
-}
-
-// 単語回答完了
-document.getElementById("wordDone").onclick = () => {
-  for(let i=1;i<=15;i++){
-    let ans = document.getElementById("ans"+i).value.trim();
-    wordAnswers.push(ans);
-  }
-  // 正答率計算
-  let correct = 0;
-  for(let i=0;i<15;i++){
-    if(wordAnswers[i] === wordList[i]) correct++;
-  }
-  surveyData.wordCorrect = correct;
-  surveyData.wordAnswers = wordAnswers;
-  document.getElementById("wordTest").classList.add("hidden");
-  startStroop();
-};
-
-// --- ストループ課題 ---
-function startStroop(){
-  document.getElementById("stroopTest").classList.remove("hidden");
-  let btns = document.getElementById("colorButtons");
-  btns.innerHTML = "";
-  colors.forEach((c,i)=>{
-    let b=document.createElement("button");
-    b.textContent=c;
-    b.style.background=colorCodes[i];
-    b.onclick=()=>checkStroop(c);
-    btns.appendChild(b);
-  });
-  nextStroop();
-}
-
-function nextStroop(){
-  if(currentStroop>=10){
-    document.getElementById("stroopTest").classList.add("hidden");
-    document.getElementById("finalResult").classList.remove("hidden");
-    return;
-  }
-  let word = colors[Math.floor(Math.random()*colors.length)];
-  let colorIdx = Math.floor(Math.random()*colors.length);
-  let display=document.getElementById("stroopDisplay");
-  display.textContent=word;
-  display.style.color=colorCodes[colorIdx];
-  display.dataset.answer = colors[colorIdx];
-  stroopStartTime = Date.now();
-}
-
-function checkStroop(choice){
-  let time = Date.now()-stroopStartTime;
-  let correct = (choice===document.getElementById("stroopDisplay").dataset.answer);
-  stroopResults.push({trial:currentStroop+1,choice,correct,time});
-  currentStroop++;
-  nextStroop();
-}
-document.getElementById("downloadPDF").onclick = ()=>{
-  const doc = new jsPDF();
-
-  // 日本語フォントを登録
-  doc.addFileToVFS("NotoSansJP-Regular-normal.ttf", NotoSansJP);
-  doc.addFont("NotoSansJP-Regular-normal.ttf", "NotoSansJP", "normal");
-  doc.setFont("NotoSansJP");
-
-  doc.setFontSize(16);
-  doc.text("高校生スマホ利用と認知能力調査 結果",20,20);
-
-  // --- アンケート結果 ---
-  doc.setFontSize(12);
-  doc.text("■ アンケート結果",20,35);
-
-  doc.autoTable({
-    startY: 40,
-    head: [["項目","回答"]],
-    body: [
-      ["平日利用時間", `${surveyData.weekday} 時間`],
-      ["休日利用時間", `${surveyData.holiday} 時間`],
-      ["利用機能順序", surveyData.functions],
-      ["その他", surveyData.other || "（なし）"],
-      ["平均睡眠時間", `${surveyData.sleep} 時間`],
-    ],
-    styles: { font: "NotoSansJP", fontSize: 11 }
-  });
-
-  // --- 単語リスト再生 ---
-  let y1 = doc.lastAutoTable.finalY + 10;
-  doc.text("■ 単語リスト再生テスト",20,y1);
-
-  doc.autoTable({
-    startY: y1+5,
-    head: [["番号","回答","正答","正誤"]],
-    body: wordList.map((w,i)=>[
-      i+1,
-      surveyData.wordAnswers[i],
-      w,
-      surveyData.wordAnswers[i]===w ? "〇":"×"
-    ]),
-    styles: { font: "NotoSansJP", fontSize: 11 }
-  });
-
-  let correct = surveyData.wordCorrect;
-  let y2 = doc.lastAutoTable.finalY + 5;
-  doc.text(`正答数: ${correct}/15`,20,y2);
-
-  // --- ストループ課題 ---
-  let y3 = y2 + 15;
-  doc.text("■ ストループ課題",20,y3);
-
-  let correctCount = stroopResults.filter(r=>r.correct).length;
-  let avgTime = (stroopResults.reduce((s,r)=>s+r.time,0)/stroopResults.length).toFixed(1);
-
-  doc.autoTable({
-    startY: y3+5,
-    head: [["試行","選択した色","正誤","反応時間(ms)"]],
-    body: stroopResults.map(r=>[
-      r.trial,
-      r.choice,
-      r.correct ? "〇":"×",
-      r.time
-    ]),
-    styles: { font: "NotoSansJP", fontSize: 11 }
-  });
-
-  let y4 = doc.lastAutoTable.finalY + 5;
-  doc.text(`正答数: ${correctCount}/10`,20,y4);
-  doc.text(`平均反応時間: ${avgTime} ms`,20,y4+10);
-
-  // PDF保存
-  doc.save("survey_result.pdf");
-};
-
-</script>
-  <!-- jsPDF & autoTable 読み込み -->
-<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.28/jspdf.plugin.autotable.min.js"></script>
-
-<script>
-function downloadPDF() {
-  const { jsPDF } = window.jspdf;
-  const doc = new jsPDF();
-
-  doc.setFontSize(16);
-  doc.text("アンケート結果", 14, 20);
-
-  // テスト用ダミーデータ（ここをアンケートの結果変数に置き換える）
-  const results = {
-    wordAccuracy: 80,
-    stroopAvgTime: 1234,
-    stroopAccuracy: 92,
-    wordAnswers: ["apple", "banana", "orange"]
-  };
-
-  const tableData = [
-    ["項目", "結果"],
-    ["単語リスト正答率", results.wordAccuracy + "%"],
-    ["ストループ課題平均反応時間", results.stroopAvgTime + " ms"],
-    ["ストループ課題正答率", results.stroopAccuracy + "%"],
-    ["単語テスト回答内容", results.wordAnswers.join(", ")]
-  ];
-
-  doc.autoTable({
-    head: [tableData[0]],
-    body: tableData.slice(1),
-    startY: 30
-  });
-
-  doc.save("results.pdf");
-}
-</script>
-
-<!-- ダウンロードボタン -->
-<button onclick="downloadPDF()">PDFをダウンロード</button>
-
+  </script>
 </body>
 </html>
