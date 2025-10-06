@@ -73,8 +73,13 @@
   </div>
 </div>
 
-<!-- jsPDFライブラリ -->
+<!-- jsPDF本体 -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<!-- 日本語フォント -->
+<script src="https://unpkg.com/jspdf-font-noto-sans-jp"></script>
+<!-- 表出力用 -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.28/jspdf.plugin.autotable.min.js"></script>
+
 <script>
 const { jsPDF } = window.jspdf;
 
@@ -193,39 +198,81 @@ function checkStroop(choice){
   nextStroop();
 }
 
-// --- PDF出力 ---
 document.getElementById("downloadPDF").onclick = ()=>{
   const doc = new jsPDF();
+
+  // 日本語フォントを登録
+  doc.addFileToVFS("NotoSansJP-Regular-normal.ttf", NotoSansJP);
+  doc.addFont("NotoSansJP-Regular-normal.ttf", "NotoSansJP", "normal");
+  doc.setFont("NotoSansJP");
+
   doc.setFontSize(16);
   doc.text("高校生スマホ利用と認知能力調査 結果",20,20);
 
+  // --- アンケート結果 ---
   doc.setFontSize(12);
   doc.text("■ アンケート結果",20,35);
-  doc.text(`平日利用時間: ${surveyData.weekday} 時間`,20,45);
-  doc.text(`休日利用時間: ${surveyData.holiday} 時間`,20,55);
-  doc.text(`利用機能順序: ${surveyData.functions}`,20,65);
-  doc.text(`その他: ${surveyData.other}`,20,75);
-  doc.text(`平均睡眠時間: ${surveyData.sleep} 時間`,20,85);
 
-  doc.text("■ 単語リスト再生テスト",20,105);
-  doc.text(`正答数: ${surveyData.wordCorrect}/15`,20,115);
-  surveyData.wordAnswers.forEach((a,i)=>{
-    doc.text(`${i+1}: ${a} (正答:${wordList[i]})`,20,125+i*6);
+  doc.autoTable({
+    startY: 40,
+    head: [["項目","回答"]],
+    body: [
+      ["平日利用時間", `${surveyData.weekday} 時間`],
+      ["休日利用時間", `${surveyData.holiday} 時間`],
+      ["利用機能順序", surveyData.functions],
+      ["その他", surveyData.other || "（なし）"],
+      ["平均睡眠時間", `${surveyData.sleep} 時間`],
+    ],
+    styles: { font: "NotoSansJP", fontSize: 11 }
   });
 
-  let y=125+wordList.length*6+10;
-  doc.text("■ ストループ課題",20,y);
-  let correctCount=stroopResults.filter(r=>r.correct).length;
-  let avgTime=(stroopResults.reduce((s,r)=>s+r.time,0)/stroopResults.length).toFixed(1);
-  doc.text(`正答数: ${correctCount}/10`,20,y+10);
-  doc.text(`平均反応時間: ${avgTime} ms`,20,y+20);
+  // --- 単語リスト再生 ---
+  let y1 = doc.lastAutoTable.finalY + 10;
+  doc.text("■ 単語リスト再生テスト",20,y1);
 
-  stroopResults.forEach((r,i)=>{
-    doc.text(`${r.trial}: ${r.choice} / ${r.correct?"〇":"×"} / ${r.time}ms`,20,y+40+i*6);
+  doc.autoTable({
+    startY: y1+5,
+    head: [["番号","回答","正答","正誤"]],
+    body: wordList.map((w,i)=>[
+      i+1,
+      surveyData.wordAnswers[i],
+      w,
+      surveyData.wordAnswers[i]===w ? "〇":"×"
+    ]),
+    styles: { font: "NotoSansJP", fontSize: 11 }
   });
 
+  let correct = surveyData.wordCorrect;
+  let y2 = doc.lastAutoTable.finalY + 5;
+  doc.text(`正答数: ${correct}/15`,20,y2);
+
+  // --- ストループ課題 ---
+  let y3 = y2 + 15;
+  doc.text("■ ストループ課題",20,y3);
+
+  let correctCount = stroopResults.filter(r=>r.correct).length;
+  let avgTime = (stroopResults.reduce((s,r)=>s+r.time,0)/stroopResults.length).toFixed(1);
+
+  doc.autoTable({
+    startY: y3+5,
+    head: [["試行","選択した色","正誤","反応時間(ms)"]],
+    body: stroopResults.map(r=>[
+      r.trial,
+      r.choice,
+      r.correct ? "〇":"×",
+      r.time
+    ]),
+    styles: { font: "NotoSansJP", fontSize: 11 }
+  });
+
+  let y4 = doc.lastAutoTable.finalY + 5;
+  doc.text(`正答数: ${correctCount}/10`,20,y4);
+  doc.text(`平均反応時間: ${avgTime} ms`,20,y4+10);
+
+  // PDF保存
   doc.save("survey_result.pdf");
 };
+
 </script>
 </body>
 </html>
