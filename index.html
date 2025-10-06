@@ -2,37 +2,35 @@
 <html lang="ja">
 <head>
   <meta charset="UTF-8">
-  <title>PDFテスト</title>
-  <!-- jsPDF & autoTable 読み込み -->
+  <title>PDF日本語対応テスト</title>
+  <!-- jsPDF -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.28/jspdf.plugin.autotable.min.js"></script>
+  <!-- 日本語フォント（NotoSansCJK Regular Base64埋め込み） -->
+  <script src="https://unpkg.com/jspdf-fonts@1.0.0/NotoSansCJKjp-Regular-normal.js"></script>
 </head>
 <body>
-  <h2>PDF出力テスト</h2>
-  <button onclick="downloadPDF()">PDFをダウンロード</button>
+  <button onclick="downloadPDF()">日本語PDFをダウンロード</button>
 
   <script>
   function downloadPDF() {
     const { jsPDF } = window.jspdf;
     const doc = new jsPDF();
 
+    // 日本語フォントを追加
+    doc.addFileToVFS("NotoSansCJKjp-Regular.ttf", NotoSansCJKjpRegular);
+    doc.addFont("NotoSansCJKjp-Regular.ttf", "NotoSansCJKjp", "normal");
+    doc.setFont("NotoSansCJKjp");
+
     doc.setFontSize(16);
     doc.text("アンケート結果", 14, 20);
 
-    // ダミーデータ
-    const results = {
-      wordAccuracy: 80,
-      stroopAvgTime: 1234,
-      stroopAccuracy: 92,
-      wordAnswers: ["apple", "banana", "orange"]
-    };
-
     const tableData = [
       ["項目", "結果"],
-      ["単語リスト正答率", results.wordAccuracy + "%"],
-      ["ストループ課題平均反応時間", results.stroopAvgTime + " ms"],
-      ["ストループ課題正答率", results.stroopAccuracy + "%"],
-      ["単語テスト回答内容", results.wordAnswers.join(", ")]
+      ["単語リスト正答率", "80%"],
+      ["ストループ課題平均反応時間", "1234 ms"],
+      ["ストループ課題正答率", "92%"],
+      ["単語テスト回答内容", "りんご, バナナ, みかん"]
     ];
 
     doc.autoTable({
