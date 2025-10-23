@@ -1,341 +1,215 @@
 <!DOCTYPE html>
 <html lang="ja">
 <head>
-<meta charset="utf-8" />
-<meta name="viewport" content="width=device-width,initial-scale=1" />
-<title>高校生スマホ利用と認知能力調査</title>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>調査２ 認知能力テスト</title>
 <style>
-  /* シンプルで見栄え良く（スマホ対応） */
-  :root{
-    --accent:#1976d2;
-    --card-bg:#fff;
-    --bg:#f0f4f8;
-    --radius:14px;
+  body {
+    font-family: 'Noto Sans JP', sans-serif;
+    background: linear-gradient(to bottom right, #e0f7fa, #e8eaf6);
+    padding: 20px;
+    color: #333;
+    text-align: center;
   }
-  html,body{height:100%;margin:0;font-family: "Noto Sans JP", "Helvetica Neue", Arial; background:var(--bg);}
-  .wrap{max-width:840px;margin:28px auto;padding:20px;}
-  .card{background:var(--card-bg);border-radius:var(--radius);box-shadow:0 8px 24px rgba(17,24,39,0.06);padding:20px;margin-bottom:18px;}
-  h1,h2{margin:6px 0 14px;color:#0f172a}
-  p {color:#111827;line-height:1.6}
-  .muted{color:#475569;font-size:0.95rem}
-  input[type="text"], input[type="number"], textarea {
-    width:100%;padding:10px;border:1px solid #e6edf3;border-radius:10px;font-size:16px;
-    box-sizing:border-box;margin-top:6px;margin-bottom:12px;
+  h1 {
+    color: #2c3e50;
+    margin-bottom: 10px;
   }
-  button{background:var(--accent);color:white;border:none;padding:10px 16px;border-radius:10px;font-size:16px;cursor:pointer;}
-  button.secondary{background:#fff;color:#0f172a;border:1px solid #e6edf3;}
-  .small {font-size:0.9rem;padding:8px 12px;border-radius:8px;}
-  .row{display:flex;gap:10px;align-items:center}
-  .chip{display:inline-block;padding:6px 10px;border-radius:999px;background:#eef2ff;color:var(--accent);font-weight:600}
-  .app-input{display:flex;gap:8px;margin-bottom:8px}
-  .app-input input{flex:1}
-  .hidden{display:none}
-  .center{text-align:center}
-  .stroop-buttons button{background:#fff;color:#000;border:1px solid #d1d5db;padding:8px 12px;margin:6px;border-radius:8px;}
-  table{width:100%;border-collapse:collapse}
-  td,th{border:1px solid #e6edf3;padding:8px;text-align:left;font-size:14px}
-  @media(min-width:900px){ .wrap{padding:40px} }
+  .section {
+    background: white;
+    border-radius: 20px;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+    padding: 20px;
+    margin: 20px auto;
+    max-width: 600px;
+  }
+  button {
+    background-color: #4CAF50;
+    color: white;
+    border: none;
+    border-radius: 12px;
+    padding: 10px 20px;
+    font-size: 16px;
+    cursor: pointer;
+    margin-top: 15px;
+  }
+  button:disabled {
+    background-color: #ccc;
+    cursor: not-allowed;
+  }
+  .word {
+    font-size: 24px;
+    font-weight: bold;
+    margin: 40px 0;
+  }
+  .color-button {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 10px;
+    justify-content: center;
+    margin-top: 20px;
+  }
+  .color-button button {
+    background: white;
+    color: black;
+    border: 2px solid #ccc;
+    border-radius: 10px;
+    padding: 12px;
+    font-size: 16px;
+  }
+  input[type="text"] {
+    width: 80%;
+    padding: 8px;
+    margin: 5px;
+    border-radius: 6px;
+    border: 1px solid #aaa;
+  }
 </style>
 </head>
 <body>
-<div class="wrap">
 
-  <div class="card">
-    <h1>高校生スマホ利用と認知能力調査</h1>
-    <p class="muted">説明文：このアンケートは、高校生のスマホ利用と認知能力の関係に関する調査に使われます。スマホを用意してください。※数分の時間を要します。</p>
-    <label>名前</label>
-    <input id="inputName" type="text" placeholder="氏名（例：山田 太郎）">
-    <div class="center">
-      <button id="btnStart">アンケートを開始する</button>
-    </div>
+<h1>調査２ 認知能力テスト</h1>
+
+<div id="section1" class="section">
+  <h3>(1) 単語リスト再生リスト</h3>
+  <p>説明文：これから、15個の単語が順番に一個づつ表示されます。それらを順番どおりでなくても良いので覚えているものだけ回答してください。メモを取らないようにお願いします。</p>
+  <button onclick="startWordTest()">スタート</button>
+  <div id="wordDisplay" class="word"></div>
+  <div id="wordInputArea" style="display:none;">
+    <p>説明文：単語は以上です。解答は表示されたのと同様に記入してください。</p>
+    <div id="inputs"></div>
+    <button onclick="submitWordAnswers()">解答完了</button>
   </div>
+</div>
 
-  <!-- 調査1 -->
-  <div id="sectionSurvey1" class="card hidden">
-    <h2>調査1　アンケート調査</h2>
-    <p class="muted">
-      説明文：Androidの場合は、設定→Digital Wellbeingと保護者による使用時間→円グラフの中央をタップして出てきた棒グラフを使って回答してください。<br>
-      iPhoneの場合は、設定→スクリーンタイム→スクリーンタイム機能を有効にする→すべてのアプリとWebサイトのアクティビティを表示をタップして出てきた棒グラフを使って回答してください。
-    </p>
+<div id="section2" class="section" style="display:none;">
+  <h3>(2) ストループ課題</h3>
+  <p>説明文：画面に色の名前が表示されます。文字の色（表示色）を答えてください。意味（文字の読み）ではなく、表示色を選んでください。なるべく素早く回答してください。しかし、間違えてしまうと二秒間回答できないので注意してください。</p>
+  <div id="stroopWord" class="word"></div>
+  <div class="color-button" id="colorButtons"></div>
+</div>
 
-    <label>(1) スマートフォンを平日にどれだけ利用しますか。</label>
-    <div class="row"><input id="q1_weekday" type="number" placeholder="()時間"></div>
-
-    <label>(2) スマートフォンを休日にどれだけ利用しますか。</label>
-    <div class="row"><input id="q2_holiday" type="number" placeholder="()時間"></div>
-
-    <label>(3) 一番使用時間の長い曜日の棒グラフをクリックしてください。使う時間が多い順にアプリとそれを使用した時間を教えてください。</label>
-    <div id="q3_area">
-      <!-- 最初の1つのみ。入力されたら下に1つ増える -->
-      <div class="app-input"><input class="q3_app" type="text" placeholder="()を()時間"></div>
-    </div>
-
-    <label>(4) (3)で入力したアプリのうち、勉強目的で使っているアプリがあれば入力してください。</label>
-    <div id="q4_area">
-      <div class="app-input"><input class="q4_app" type="text" placeholder="()を()時間"></div>
-    </div>
-
-    <label>(5) 親や自分自身が、スマホを制限していますか。</label>
-    <div class="row">
-      <label><input name="q5_limit" type="radio" value="O"> O</label>
-      <label><input name="q5_limit" type="radio" value="X"> X</label>
-    </div>
-
-    <div id="q6_area" class="hidden">
-      <label>(6) 制限内容を具体的に教えてください。</label>
-      <textarea id="q6_text" rows="3" placeholder="自由に記入してください"></textarea>
-    </div>
-
-    <div class="center">
-      <button id="btnSurvey1Done">入力完了</button>
-    </div>
-  </div>
-
-  <!-- 調査2 単語 -->
-  <div id="sectionMemory" class="card hidden">
-    <h2>調査２ 認知能力テスト</h2>
-    <h3>① 単語リスト再生リスト</h3>
-    <p class="muted">説明文：これから、15個の単語が順番に一個づつ表示されます。それらを順番どおりでなくても良いので覚えているものだけ回答してください。メモを取らないようにお願いします。</p>
-
-    <div class="center">
-      <button id="btnMemoryStart">スタート</button>
-    </div>
-
-    <div id="memory_display" class="center" style="font-size:26px;margin-top:18px;"></div>
-
-    <!-- 3秒後に以下を表示 -->
-    <div id="memory_answer_area" class="hidden" style="margin-top:14px;">
-      <p class="muted">説明文：単語は以上です。解答は表示されたのと同様に記入してください。</p>
-      <div id="memory_inputs"></div>
-      <div class="center" style="margin-top:10px;">
-        <button id="btnMemorySubmit">解答完了</button>
-      </div>
-    </div>
-  </div>
-
-  <!-- 調査2 ストループ -->
-  <div id="sectionStroop" class="card hidden">
-    <h3>② ストループ課題</h3>
-    <p class="muted">説明文：画面に色の名前が表示されます。文字の色（表示色）を答えてください。意味（文字の読み）ではなく、表示色を選んでください。なるべく素早く回答してください。しかし、間違えてしまうと二秒間回答できないので注意してください。例題：「赤（表示色を青で表示する）」の場合は、青を選択してください。</p>
-
-    <div id="stroop_display" class="center" style="font-size:30px;margin:18px 0;"></div>
-    <div id="stroop_buttons" class="stroop-buttons center"></div>
-
-    <div class="center" style="margin-top:14px;">
-      <button id="btnStroopStart">スタート</button>
-    </div>
-  </div>
-
-  <div id="sectionEnd" class="card hidden center">
-    <h2>説明文：テストは以上です。ありがとうございました。このサイトは閉じていただいて構いません。</h2>
-  </div>
-
+<div id="section3" class="section" style="display:none;">
+  <h3>結果</h3>
+  <p>説明文：テストは以上です。ありがとうございました。あなたの結果は、以下の通りです。</p>
+  <p>単語再生テストの正答率：<span id="wordScore"></span></p>
+  <p>ストループ課題の反応速度の平均タイム：<span id="stroopAvg"></span></p>
 </div>
 
 <script>
-/* ---------- 設定（ここに GAS の Web App URL を入れてください） ---------- */
-const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbyqCPQd1XutDU7a8Weta8ojb1jB1sRy9QTQWdHHUcto8sfSpzwt2ZCo-Fej7FBW-B0/exec";
+const words = ["犬","机","空","花","川","時計","山","星","本","雲","学校","月","窓","椅子","紙"];
+let shuffledWords = [];
+let wordIndex = 0;
+let correctWords = [...words];
+let userAnswers = [];
 
-/* ---------- 変数 ---------- */
-let participant = { name:"", survey:{}, memory:{}, stroop:{} };
-
-/* ---------- ユーティリティ ---------- */
-function $(id){ return document.getElementById(id); }
-
-/* ---------- スタート ---------- */
-$('btnStart').addEventListener('click', ()=> {
-  const name = $('inputName').value.trim();
-  if(!name){ alert('名前を入力してください'); return; }
-  participant.name = name;
-  $('sectionSurvey1').classList.remove('hidden');
-  window.scrollTo(0,0);
-});
-
-/* ---------- Q3/Q4 動的追加（1つだけ、入力が入ったら下に追加） ---------- */
-function watchAddFields(areaId, cls){
-  const area = $(areaId);
-  area.addEventListener('input', (e)=>{
-    // find last input of class
-    const inputs = area.querySelectorAll('input.'+cls);
-    const last = inputs[inputs.length-1];
-    if(last && last.value.trim() !== ""){
-      // add new
-      const div = document.createElement('div');
-      div.className = 'app-input';
-      const inp = document.createElement('input');
-      inp.className = cls;
-      inp.type = 'text';
-      inp.placeholder = '()を()時間';
-      div.appendChild(inp);
-      area.appendChild(div);
-    }
-  });
+function startWordTest() {
+  document.querySelector("#wordDisplay").textContent = "";
+  shuffledWords = [...words].sort(() => Math.random() - 0.5);
+  wordIndex = 0;
+  showNextWord();
 }
-watchAddFields('q3_area','q3_app');
-watchAddFields('q4_area','q4_app');
 
-/* ---------- Q5->Q6 の表示切替 ---------- */
-document.querySelectorAll('input[name="q5_limit"]').forEach(r=>{
-  r.addEventListener('change', ()=>{
-    const v = document.querySelector('input[name="q5_limit"]:checked')?.value;
-    if(v === 'O') $('q6_area').classList.remove('hidden'); else $('q6_area').classList.add('hidden');
-  });
-});
-
-/* ---------- 調査1 完了 ---------- */
-$('btnSurvey1Done').addEventListener('click', ()=>{
-  participant.survey.q1 = $('q1_weekday').value;
-  participant.survey.q2 = $('q2_holiday').value;
-  participant.survey.q3 = Array.from(document.querySelectorAll('#q3_area .q3_app')).map(i=>i.value).filter(v=>v);
-  participant.survey.q4 = Array.from(document.querySelectorAll('#q4_area .q4_app')).map(i=>i.value).filter(v=>v);
-  participant.survey.q5 = document.querySelector('input[name="q5_limit"]:checked')?.value || "";
-  participant.survey.q6 = $('q6_text').value || "";
-  // move to memory
-  $('sectionSurvey1').classList.add('hidden');
-  $('sectionMemory').classList.remove('hidden');
-  window.scrollTo(0,0);
-});
-
-/* ---------- 単語リスト再生テスト ---------- */
-const WORDS = ["りんご","ねこ","やま","ひこうき","はさみ","じてんしゃ","つき","ふで","いぬ","かさ","でんわ","みず","はな","くるま","たいよう"];
-let memoryShown = [];
-$('btnMemoryStart').addEventListener('click', ()=> {
-  $('btnMemoryStart').disabled = true;
-  const disp = $('memory_display');
-  disp.textContent = '';
-  memoryShown = WORDS.slice().sort(()=>Math.random()-0.5);
-  let i = 0;
-  const iv = setInterval(()=>{
-    if(i < memoryShown.length){
-      disp.textContent = memoryShown[i++];
-    } else {
-      clearInterval(iv);
-      disp.textContent = '';
-      setTimeout(()=> {
-        // show instruction + 15 inputs + 解答完了ボタン
-        $('memory_answer_area').classList.remove('hidden');
-        const container = $('memory_inputs');
-        container.innerHTML = '';
-        for(let j=0;j<15;j++){
-          const inp = document.createElement('input');
-          inp.type = 'text';
-          inp.placeholder = `単語${j+1}`;
-          inp.style.margin = '6px 0';
-          inp.style.width = '100%';
-          container.appendChild(inp);
-        }
-        // 解答完了ボタンは既に HTML にある（btnMemorySubmit）
-      }, 3000);
-    }
-  }, 2000);
-});
-
-$('btnMemorySubmit').addEventListener('click', ()=>{
-  const inputs = Array.from($('memory_inputs').querySelectorAll('input')).map(i=>i.value.trim()).filter(v=>v);
-  const correct = inputs.filter(x=>memoryShown.includes(x)).length;
-  participant.memory.correctNum = correct;
-  participant.memory.total = memoryShown.length;
-  participant.memory.correctRate = Math.round(correct / memoryShown.length * 100);
-  // proceed to stroop
-  $('sectionMemory').classList.add('hidden');
-  $('sectionStroop').classList.remove('hidden');
-  window.scrollTo(0,0);
-});
-
-/* ---------- ストループ課題 ---------- */
-const COLORS = ["赤","青","黄","緑","紫","茶","ピンク","オレンジ"];
-const COLOR_MAP = { 赤:"#ff0000", 青:"#0000ff", 黄:"#ffd400", 緑:"#00a86b", 紫:"#7b3fbf", 茶:"#8b4513", ピンク:"#ff69b4", オレンジ:"#ff8c00" };
-let stroopTrial = 0;
-let stroopTimes = [];
-let correctColor = null;
-let stroopStartTime = 0;
-
-function setupStroopButtons(){
-  const area = $('stroop_buttons');
-  area.innerHTML = '';
-  COLORS.forEach(c=>{
-    const b = document.createElement('button');
-    b.textContent = c;
-    b.className = 'small';
-    b.addEventListener('click', ()=> checkStroop(c));
-    area.appendChild(b);
-  });
+function showNextWord() {
+  if (wordIndex < shuffledWords.length) {
+    document.querySelector("#wordDisplay").textContent = shuffledWords[wordIndex];
+    wordIndex++;
+    setTimeout(showNextWord, 2000);
+  } else {
+    setTimeout(() => {
+      document.querySelector("#wordDisplay").textContent = "";
+      showWordInput();
+    }, 3000);
+  }
 }
-setupStroopButtons();
 
-$('btnStroopStart').addEventListener('click', ()=>{
-  $('btnStroopStart').disabled = true;
-  stroopTrial = 0;
-  stroopTimes = [];
+function showWordInput() {
+  const inputArea = document.querySelector("#wordInputArea");
+  inputArea.style.display = "block";
+  const inputContainer = document.querySelector("#inputs");
+  inputContainer.innerHTML = "";
+  for (let i = 0; i < 15; i++) {
+    inputContainer.innerHTML += `<input type="text" id="ans${i}" placeholder="単語${i+1}"><br>`;
+  }
+}
+
+function submitWordAnswers() {
+  userAnswers = [];
+  for (let i = 0; i < 15; i++) {
+    userAnswers.push(document.querySelector(`#ans${i}`).value.trim());
+  }
+  let correctCount = userAnswers.filter(ans => correctWords.includes(ans)).length;
+  wordScore = Math.round((correctCount / 15) * 100);
+  document.querySelector("#section1").style.display = "none";
+  startStroopTest();
+}
+
+const colors = ["赤","青","黄","緑","紫","茶","ピンク","オレンジ"];
+const colorMap = {
+  "赤":"red","青":"blue","黄":"gold","緑":"green","紫":"purple",
+  "茶":"brown","ピンク":"pink","オレンジ":"orange"
+};
+let stroopCount = 0;
+let stroopStartTime;
+let totalTime = 0;
+let stroopDisabled = false;
+
+function startStroopTest() {
+  document.querySelector("#section2").style.display = "block";
+  const btnContainer = document.querySelector("#colorButtons");
+  btnContainer.innerHTML = "";
+  colors.forEach(c=>{
+    const btn = document.createElement("button");
+    btn.textContent = c;
+    btn.onclick = ()=>checkStroopAnswer(c);
+    btnContainer.appendChild(btn);
+  });
   nextStroop();
-});
+}
 
-function nextStroop(){
-  if(stroopTrial >= 10){
-    // finish
-    participant.stroop.times = stroopTimes.slice();
-    participant.stroop.avg = stroopTimes.length ? (stroopTimes.reduce((a,b)=>a+b,0)/stroopTimes.length).toFixed(2) : 0;
-    // send data to GAS
-    sendResultToGAS();
-    $('sectionStroop').classList.add('hidden');
-    $('sectionEnd').classList.remove('hidden');
-    window.scrollTo(0,0);
+function nextStroop() {
+  if (stroopCount >= 10) {
+    finishTest();
     return;
   }
-  // pick word and display color that differs
-  const word = COLORS[Math.floor(Math.random()*COLORS.length)];
-  let color = COLORS[Math.floor(Math.random()*COLORS.length)];
-  while(color === word) color = COLORS[Math.floor(Math.random()*COLORS.length)];
-  correctColor = color;
-  const disp = $('stroop_display');
-  disp.textContent = word;
-  disp.style.color = COLOR_MAP[color];
-  stroopStartTime = performance.now();
+  const word = colors[Math.floor(Math.random()*7)];
+  let color;
+  do { color = colors[Math.floor(Math.random()*7)]; } while (color===word);
+  const display = document.querySelector("#stroopWord");
+  display.textContent = word;
+  display.style.color = colorMap[color];
+  display.dataset.correct = color;
+  stroopStartTime = Date.now();
 }
 
-function checkStroop(choice){
-  const elapsed = performance.now() - stroopStartTime; // ms
-  if(choice === correctColor){
-    stroopTimes.push(Math.round(elapsed));
-    stroopTrial++;
+function checkStroopAnswer(selected) {
+  if (stroopDisabled) return;
+  const display = document.querySelector("#stroopWord");
+  const correct = display.dataset.correct;
+  const responseTime = Date.now() - stroopStartTime;
+  if (selected === correct) {
+    totalTime += responseTime;
+    stroopCount++;
     nextStroop();
   } else {
-    // disable buttons for 2s and do not advance
-    const btns = document.querySelectorAll('#stroop_buttons button');
-    btns.forEach(b=>b.disabled = true);
-    setTimeout(()=> btns.forEach(b=>b.disabled = false), 2000);
+    stroopDisabled = true;
+    display.textContent = "× 間違い！";
+    setTimeout(()=>{
+      stroopDisabled = false;
+      nextStroop();
+    },2000);
   }
 }
 
-/* ---------- 送信 ---------- */
-function sendResultToGAS(){
-  const payload = {
-    name: participant.name,
-    weekday_hours: participant.survey.q1 || "",
-    holiday_hours: participant.survey.q2 || "",
-    apps: participant.survey.q3 || [],
-    study_apps: participant.survey.q4 || [],
-    limited: participant.survey.q5 || "",
-    limit_detail: participant.survey.q6 || "",
-    word_correct: participant.memory.correctNum || 0,
-    word_total: participant.memory.total || 15,
-    word_correct_rate: participant.memory.correctRate || 0,
-    stroop_times_ms: participant.stroop.times || [],
-    stroop_avg_ms: participant.stroop.avg || ""
-  };
-
-  const query = new URLSearchParams({ payload: JSON.stringify(payload) });
-
-  fetch(`${SCRIPT_URL}?${query.toString()}`)
-    .then(res => res.json())
-    .then(js => {
-      // optional: console.log(js);
-    })
-    .catch(err => {
-      console.error('送信エラー', err);
-    });
+function finishTest() {
+  document.querySelector("#section2").style.display = "none";
+  document.querySelector("#section3").style.display = "block";
+  document.querySelector("#wordScore").textContent = wordScore + "%";
+  document.querySelector("#stroopAvg").textContent = Math.round(totalTime/10) + " ms";
 }
 </script>
 </body>
 </html>
+
 
