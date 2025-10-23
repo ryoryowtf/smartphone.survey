@@ -86,18 +86,25 @@
 <div id="section2" class="section" style="display:none;">
   <h3>(2) ストループ課題</h3>
   <p>説明文：画面に色の名前が表示されます。文字の色（表示色）を答えてください。意味（文字の読み）ではなく、表示色を選んでください。なるべく素早く回答してください。しかし、間違えてしまうと二秒間回答できないので注意してください。</p>
-  <div id="stroopWord" class="word"></div>
-  <div class="color-button" id="colorButtons"></div>
+  
+  <!-- 🔽 ストループ課題用スタートボタン -->
+  <button id="stroopStartButton" onclick="beginStroop()">スタート</button>
+
+  <div id="stroopTestArea" style="display:none;">
+    <div id="stroopWord" class="word"></div>
+    <div class="color-button" id="colorButtons"></div>
+  </div>
 </div>
 
 <div id="section3" class="section" style="display:none;">
   <h3>結果</h3>
-  <p>説明文：テストは以上です。ありがとうございました。あなたの結果は、以下の通りです。</p>
+  <p>説明文：テストは以上です。ありがとうございました。あなたの結果は、以下の通りです。Googleフォームに結果を記入してください。</p>
   <p>単語再生テストの正答率：<span id="wordScore"></span></p>
   <p>ストループ課題の反応速度の平均タイム：<span id="stroopAvg"></span></p>
 </div>
 
 <script>
+/* ---------- 単語リスト再生 ---------- */
 const words = ["犬","机","空","花","川","時計","山","星","本","雲","学校","月","窓","椅子","紙"];
 let shuffledWords = [];
 let wordIndex = 0;
@@ -142,9 +149,10 @@ function submitWordAnswers() {
   let correctCount = userAnswers.filter(ans => correctWords.includes(ans)).length;
   wordScore = Math.round((correctCount / 15) * 100);
   document.querySelector("#section1").style.display = "none";
-  startStroopTest();
+  document.querySelector("#section2").style.display = "block";
 }
 
+/* ---------- ストループ課題 ---------- */
 const colors = ["赤","青","黄","緑","紫","茶","ピンク","オレンジ"];
 const colorMap = {
   "赤":"red","青":"blue","黄":"gold","緑":"green","紫":"purple",
@@ -155,8 +163,13 @@ let stroopStartTime;
 let totalTime = 0;
 let stroopDisabled = false;
 
+function beginStroop() {
+  document.querySelector("#stroopStartButton").style.display = "none";
+  document.querySelector("#stroopTestArea").style.display = "block";
+  startStroopTest();
+}
+
 function startStroopTest() {
-  document.querySelector("#section2").style.display = "block";
   const btnContainer = document.querySelector("#colorButtons");
   btnContainer.innerHTML = "";
   colors.forEach(c=>{
@@ -211,5 +224,4 @@ function finishTest() {
 </script>
 </body>
 </html>
-
 
