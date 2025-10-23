@@ -1,46 +1,284 @@
 <!DOCTYPE html>
 <html lang="ja">
 <head>
-  <meta charset="UTF-8">
-  <title>PDF日本語対応テスト</title>
-  <!-- jsPDF -->
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.28/jspdf.plugin.autotable.min.js"></script>
-  <!-- 日本語フォント（NotoSansCJK Regular Base64埋め込み） -->
-  <script src="https://unpkg.com/jspdf-fonts@1.0.0/NotoSansCJKjp-Regular-normal.js"></script>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>高校生スマホ利用と認知能力調査</title>
+<style>
+  body {
+    font-family: 'Noto Sans JP', sans-serif;
+    background: #f6f8fa;
+    color: #333;
+    padding: 20px;
+    max-width: 700px;
+    margin: auto;
+  }
+  h1, h2 { text-align: center; color: #222; }
+  .card {
+    background: white;
+    border-radius: 16px;
+    padding: 20px;
+    box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+    margin: 20px 0;
+  }
+  button {
+    display: block;
+    margin: 20px auto;
+    background: #007BFF;
+    color: white;
+    border: none;
+    border-radius: 8px;
+    padding: 10px 20px;
+    font-size: 16px;
+    cursor: pointer;
+  }
+  button:hover { background: #0056b3; }
+  input[type="text"], input[type="number"] {
+    padding: 8px;
+    font-size: 15px;
+    border: 1px solid #ccc;
+    border-radius: 8px;
+    width: 80%;
+    margin-top: 8px;
+  }
+  .hidden { display: none; }
+  .app-input { display: flex; gap: 10px; margin: 10px 0; }
+  .stroop-buttons button {
+    display: inline-block;
+    margin: 5px;
+    background: white;
+    color: black;
+    border: 1px solid #ccc;
+    width: 80px;
+  }
+</style>
 </head>
 <body>
-  <button onclick="downloadPDF()">日本語PDFをダウンロード</button>
 
-  <script>
-  function downloadPDF() {
-    const { jsPDF } = window.jspdf;
-    const doc = new jsPDF();
+<h1>高校生のスマホ利用と認知能力調査</h1>
 
-    // 日本語フォントを追加
-    doc.addFileToVFS("NotoSansCJKjp-Regular.ttf", NotoSansCJKjpRegular);
-    doc.addFont("NotoSansCJKjp-Regular.ttf", "NotoSansCJKjp", "normal");
-    doc.setFont("NotoSansCJKjp");
+<div id="start-screen" class="card">
+  <p>このアンケートは、高校生のスマホ利用と認知能力の関係に関する調査に使われます。<br>
+  スマホを用意してください。※数分の時間を要します。</p>
+  <input type="text" id="username" placeholder="名前を入力してください">
+  <button id="start-btn">アンケートを開始する</button>
+</div>
 
-    doc.setFontSize(16);
-    doc.text("アンケート結果", 14, 20);
+<div id="survey1" class="card hidden">
+  <h2>調査1：アンケート調査</h2>
+  <p>Androidの場合は、設定→Digital Wellbeingと保護者による使用時間→円グラフの中央をタップして出てきた棒グラフを使って回答してください。<br>
+  iPhoneの場合は、設定→スクリーンタイム→スクリーンタイム機能を有効にする→すべてのアプリとWebサイトのアクティビティを表示をタップして出てきた棒グラフを使って回答してください。</p>
+  
+  <p>(1) スマートフォンを平日にどれだけ利用しますか？</p>
+  <input type="number" id="weekday" placeholder="例：5"> 時間
 
-    const tableData = [
-      ["項目", "結果"],
-      ["単語リスト正答率", "80%"],
-      ["ストループ課題平均反応時間", "1234 ms"],
-      ["ストループ課題正答率", "92%"],
-      ["単語テスト回答内容", "りんご, バナナ, みかん"]
-    ];
+  <p>(2) スマートフォンを休日にどれだけ利用しますか？</p>
+  <input type="number" id="holiday" placeholder="例：8"> 時間
 
-    doc.autoTable({
-      head: [tableData[0]],
-      body: tableData.slice(1),
-      startY: 30
-    });
+  <p>(3) 使う時間が多い順にアプリ名と使用時間を入力してください。</p>
+  <div id="apps"></div>
 
-    doc.save("results.pdf");
+  <p>(4) 勉強目的で使っているアプリがあれば入力してください。</p>
+  <div id="studyApps"></div>
+
+  <p>(5) 親や自分自身がスマホを制限していますか？</p>
+  <label><input type="radio" name="limit" value="O">O</label>
+  <label><input type="radio" name="limit" value="X">X</label>
+
+  <div id="limit-detail" class="hidden">
+    <p>(6) 制限内容を具体的に教えてください。</p>
+    <textarea id="limitText" rows="3" style="width:100%;"></textarea>
+  </div>
+
+  <button id="finish-survey">入力完了</button>
+</div>
+
+<div id="test1" class="card hidden">
+  <h2>調査2：認知能力テスト</h2>
+  <p>次に、認知能力に関するテストを行います。</p>
+  
+  <h3>① 単語リスト再生テスト</h3>
+  <p>これから、15個の単語が順番に一個ずつ表示されます。それらを順番どおりでなくても良いので覚えているものだけ回答してください。</p>
+  <button id="start-words">スタート</button>
+  <div id="word-display"></div>
+  <div id="word-answer" class="hidden">
+    <p>単語は以上です。思い出せる単語を記入してください。</p>
+    <div id="answer-list"></div>
+    <button id="finish-words">解答完了</button>
+  </div>
+</div>
+
+<div id="stroop" class="card hidden">
+  <h3>② ストループ課題</h3>
+  <p>画面に色の名前が表示されます。文字の色を答えてください。</p>
+  <button id="start-stroop">スタート</button>
+  <div id="stroop-test" class="hidden">
+    <h2 id="stroop-word"></h2>
+    <div class="stroop-buttons"></div>
+  </div>
+</div>
+
+<div id="end" class="card hidden">
+  <p>テストは以上です。ありがとうございました。このサイトは閉じていただいて構いません。</p>
+</div>
+
+<script>
+// --- 基本設定 ---
+const words = ["リンゴ","時計","山","川","猫","空","花","車","家","机","椅子","本","鳥","道","月"];
+const colors = ["赤","青","黄","緑","紫","茶","ピンク","オレンジ"];
+const colorCodes = {赤:"red",青:"blue",黄:"yellow",緑:"green",紫:"purple",茶:"brown",ピンク:"pink",オレンジ:"orange"};
+let username = "";
+let responses = {};
+let wordAnswers = [];
+let correctWords = 0;
+let stroopResults = [];
+
+// --- スタート画面 ---
+document.getElementById("start-btn").onclick = () => {
+  username = document.getElementById("username").value.trim();
+  if(!username) return alert("名前を入力してください。");
+  document.getElementById("start-screen").classList.add("hidden");
+  document.getElementById("survey1").classList.remove("hidden");
+  addAppInput("apps");
+  addAppInput("studyApps");
+};
+
+// --- アプリ入力欄を動的に追加 ---
+function addAppInput(id){
+  const div = document.createElement("div");
+  div.className = "app-input";
+  const name = document.createElement("input");
+  name.placeholder = "アプリ名";
+  const time = document.createElement("input");
+  time.placeholder = "利用時間(時間)";
+  time.type = "number";
+  div.append(name,time);
+  document.getElementById(id).append(div);
+  name.addEventListener("input",()=>{if(name.value) addAppInput(id)});
+}
+
+// --- 制限質問 ---
+document.querySelectorAll("input[name='limit']").forEach(r=>{
+  r.addEventListener("change",()=>{
+    if(r.value==="O") document.getElementById("limit-detail").classList.remove("hidden");
+    else document.getElementById("limit-detail").classList.add("hidden");
+  });
+});
+
+// --- 調査1完了 ---
+document.getElementById("finish-survey").onclick = ()=>{
+  responses = {
+    weekday: document.getElementById("weekday").value,
+    holiday: document.getElementById("holiday").value,
+    apps: [...document.querySelectorAll("#apps .app-input")].map(x=>[x.children[0].value,x.children[1].value]),
+    studyApps: [...document.querySelectorAll("#studyApps .app-input")].map(x=>[x.children[0].value,x.children[1].value]),
+    limit: document.querySelector("input[name='limit']:checked")?.value || "",
+    limitText: document.getElementById("limitText").value
+  };
+  document.getElementById("survey1").classList.add("hidden");
+  document.getElementById("test1").classList.remove("hidden");
+};
+
+// --- 単語リスト再生テスト ---
+document.getElementById("start-words").onclick = ()=>{
+  const shuffled = [...words].sort(()=>Math.random()-0.5);
+  let i=0;
+  const display = document.getElementById("word-display");
+  display.innerHTML = "";
+  const interval = setInterval(()=>{
+    if(i<shuffled.length){
+      display.innerHTML = `<h2>${shuffled[i++]}</h2>`;
+    } else {
+      clearInterval(interval);
+      display.innerHTML = "";
+      setTimeout(()=>{
+        document.getElementById("word-answer").classList.remove("hidden");
+        const ansDiv = document.getElementById("answer-list");
+        ansDiv.innerHTML = "";
+        for(let j=0;j<15;j++){
+          const inp = document.createElement("input");
+          inp.type="text";
+          ansDiv.append(inp,document.createElement("br"));
+        }
+      },3000);
+    }
+  },2000);
+};
+
+// --- 単語回答完了 ---
+document.getElementById("finish-words").onclick = ()=>{
+  const answers = [...document.querySelectorAll("#answer-list input")].map(i=>i.value.trim());
+  correctWords = answers.filter(a=>words.includes(a)).length;
+  wordAnswers = answers;
+  document.getElementById("test1").classList.add("hidden");
+  document.getElementById("stroop").classList.remove("hidden");
+};
+
+// --- ストループ課題 ---
+document.getElementById("start-stroop").onclick = startStroop;
+function startStroop(){
+  document.getElementById("start-stroop").classList.add("hidden");
+  const area = document.getElementById("stroop-test");
+  area.classList.remove("hidden");
+  const word = document.getElementById("stroop-word");
+  const btnArea = document.querySelector(".stroop-buttons");
+  btnArea.innerHTML = "";
+  colors.forEach(c=>{
+    const b = document.createElement("button");
+    b.textContent=c;
+    b.onclick=()=>checkStroop(c);
+    btnArea.append(b);
+  });
+  nextStroop();
+}
+let currentColor, correctColor, startTime, trial=0;
+function nextStroop(){
+  if(trial>=10){
+    finishAll();
+    return;
   }
-  </script>
+  const word = document.getElementById("stroop-word");
+  const wordText = colors[Math.floor(Math.random()*colors.length)];
+  let color;
+  do{color=colors[Math.floor(Math.random()*colors.length)];}while(color===wordText);
+  currentColor = wordText; correctColor = color;
+  word.textContent = wordText;
+  word.style.color = colorCodes[color];
+  startTime = performance.now();
+}
+function checkStroop(choice){
+  const elapsed = (performance.now()-startTime)/1000;
+  if(choice===correctColor){
+    stroopResults.push(elapsed);
+    trial++;
+    nextStroop();
+  } else {
+    document.querySelectorAll(".stroop-buttons button").forEach(b=>b.disabled=true);
+    setTimeout(()=>{
+      document.querySelectorAll(".stroop-buttons button").forEach(b=>b.disabled=false);
+    },2000);
+  }
+}
+
+// --- 結果送信 ---
+function finishAll(){
+  const avg = stroopResults.reduce((a,b)=>a+b,0)/stroopResults.length;
+  const payload = {
+    name: username,
+    survey: responses,
+    wordCorrect: correctWords,
+    wordTotal: 15,
+    stroopTimes: stroopResults,
+    stroopAvg: avg.toFixed(2)
+  };
+  fetch("YOUR_GOOGLE_APPS_SCRIPT_URL",{
+    method:"POST",
+    body: JSON.stringify(payload)
+  }).then(()=> {
+    document.getElementById("stroop").classList.add("hidden");
+    document.getElementById("end").classList.remove("hidden");
+  });
+}
+</script>
 </body>
 </html>
