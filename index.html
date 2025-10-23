@@ -74,17 +74,17 @@
     <p>(2) スマートフォンを休日にどれだけ利用しますか。</p>
     <input id="q2" type="number" placeholder="()時間" /> 時間
 
-    <p>(3) 使う時間が多い順にアプリと使用時間を入力してください。</p>
+    <p>(3) 一番使用時間の長い曜日の棒グラフをクリックしてください。使う時間が多い順にアプリと使用時間を入力してください。</p>
     <div id="q3-area">
       <input class="q3" type="text" placeholder="(アプリ名)を(時間)使用" oninput="addField('q3-area','q3')" />
     </div>
 
-    <p>(4) 勉強目的で使っているアプリがあれば入力してください。</p>
+    <p>(4) (3)で入力したアプリのうち、勉強目的で使っている（例：Youtubeで授業の動画を見る）アプリがあれば、アプリ名とその利用時間を教えてください。</p>
     <div id="q4-area">
       <input class="q4" type="text" placeholder="(アプリ名)を(時間)使用" oninput="addField('q4-area','q4')" />
     </div>
 
-    <p>(5) スマホを制限していますか。</p>
+    <p>(5) 親や自分自身が、スマホを制限していますか。</p>
     <label><input type="radio" name="q5" value="O" onchange="toggleQ6()"> O </label>
     <label><input type="radio" name="q5" value="X" onchange="toggleQ6()"> X </label>
 
@@ -98,7 +98,7 @@
   <!-- 単語リスト再生 -->
   <div id="memory-test" class="hidden">
     <h2>調査2：認知能力テスト</h2>
-    <p>これから15個の単語が順番に表示されます。それらを覚えてください。</p>
+    <p>これから、15個の単語が順番に一個づつ表示されます。それらを順番どおりでなくても良いので覚えているものだけ回答してください。メモを取らないようにお願いします。</p>
     <button onclick="startMemory()">スタート</button>
     <div id="wordDisplay" style="font-size:24px; margin-top:20px; text-align:center;"></div>
     <div id="memory-answer" class="hidden">
@@ -111,7 +111,8 @@
   <!-- ストループ課題 -->
   <div id="stroop-test" class="hidden">
     <h2>ストループ課題</h2>
-    <p id="stroop-text">画面に色の名前が表示されます。文字の色（表示色）を答えてください。</p>
+   <p id="stroop-text">画面に色の名前が表示されます。文字の色（表示色）を答えてください。意味（文字の読み）ではなく、表示色を選んでください。<br>
+                       なるべく素早く回答してください。しかし、間違えてしまうと二秒間回答できないので注意してください。</p>
     <button id="stroop-start" onclick="startStroop()">スタート</button>
     <div id="stroop-display" style="font-size:32px; text-align:center; margin:20px;"></div>
     <div class="color-buttons hidden" id="color-buttons"></div>
@@ -124,7 +125,7 @@
 </div>
 
 <script>
-const scriptURL = "https://script.google.com/macros/s/AKfycbzTh-_EupuNRGLGR31UsY-qYjLf0FFVErO8evxmnhYO-BsWriHbCZxsIC3CzeSX99lo/exec";
+const scriptURL = "https://script.google.com/macros/s/AKfycbwmabfd9RBFW7mD_BOPwIr1mHc2B1Bx1MpN4Xr9KJYUQ0viu5hD1Y6wQGQwcFs08pYP/exec";
 
 let data = { name: "", answers: {}, memoryTest: {}, stroopTest: {} };
 const wordList = ["犬","机","花","山","水","空","月","本","川","木","車","雨","鳥","石","家"];
