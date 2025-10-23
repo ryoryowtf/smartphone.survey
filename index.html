@@ -134,7 +134,7 @@
 
 <script>
 /* ---------- 設定（ここに GAS の Web App URL を入れてください） ---------- */
-const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzDGRELMBt0tH_vkyaU4yUSk-ictdSpzPFiMsqi_PkWp6q4rutuUKcUj2UyDirf8iImnw/exec";
+const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbw8CegDy6oM2QQS_wUtxDDeHRTtYYcqNEAlt_Glh4f2wzfDzGjIIVt_nR5Q2Z9c_DOSRA/exec";
 
 /* ---------- 変数 ---------- */
 let participant = { name:"", survey:{}, memory:{}, stroop:{} };
@@ -309,7 +309,6 @@ function checkStroop(choice){
 
 /* ---------- 送信 ---------- */
 function sendResultToGAS(){
-  // Build payload in tabular-friendly shape
   const payload = {
     name: participant.name,
     weekday_hours: participant.survey.q1 || "",
@@ -325,24 +324,16 @@ function sendResultToGAS(){
     stroop_avg_ms: participant.stroop.avg || ""
   };
 
-  // POST
-const formData = new URLSearchParams();
-formData.append("payload", JSON.stringify(payload));
+  const query = new URLSearchParams({ payload: JSON.stringify(payload) });
 
-fetch(SCRIPT_URL, {
-  method: 'POST',
-  headers: {
-    'Content-Type': 'application/x-www-form-urlencoded'
-  },
-  body: formData.toString()
-})
-.then(res => res.json())
-.then(js => {
-  // optional: console.log(js);
-})
-.catch(err => {
-  console.error('送信エラー', err);
-});
+  fetch(`${SCRIPT_URL}?${query.toString()}`)
+    .then(res => res.json())
+    .then(js => {
+      // optional: console.log(js);
+    })
+    .catch(err => {
+      console.error('送信エラー', err);
+    });
 }
 </script>
 </body>
