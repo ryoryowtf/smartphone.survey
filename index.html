@@ -6,222 +6,230 @@
 <title>調査２ 認知能力テスト</title>
 <style>
   body {
-    font-family: 'Noto Sans JP', sans-serif;
-    background: linear-gradient(to bottom right, #e0f7fa, #e8eaf6);
-    padding: 20px;
-    color: #333;
+    font-family: "Hiragino Sans", "Meiryo", sans-serif;
+    background: linear-gradient(180deg, #f2f6fc, #ffffff);
+    margin: 0;
+    padding: 0;
     text-align: center;
+    color: #333;
+  }
+  .container {
+    max-width: 600px;
+    margin: 50px auto;
+    background: white;
+    border-radius: 16px;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+    padding: 30px;
   }
   h1 {
-    color: #2c3e50;
-    margin-bottom: 10px;
+    color: #2b5fae;
   }
-  .section {
-    background: white;
-    border-radius: 20px;
-    box-shadow: 0 4px 10px rgba(0,0,0,0.1);
-    padding: 20px;
-    margin: 20px auto;
-    max-width: 600px;
+  h2 {
+    color: #444;
+    border-bottom: 2px solid #ddd;
+    padding-bottom: 6px;
   }
   button {
-    background-color: #4CAF50;
+    background-color: #2b5fae;
     color: white;
     border: none;
-    border-radius: 12px;
-    padding: 10px 20px;
-    font-size: 16px;
+    padding: 12px 28px;
+    border-radius: 10px;
+    font-size: 1rem;
     cursor: pointer;
-    margin-top: 15px;
+    margin-top: 20px;
   }
   button:disabled {
     background-color: #ccc;
     cursor: not-allowed;
   }
   .word {
-    font-size: 24px;
-    font-weight: bold;
+    font-size: 2rem;
     margin: 40px 0;
   }
-  .color-button {
-    display: grid;
-    grid-template-columns: repeat(4, 1fr);
-    gap: 10px;
-    justify-content: center;
-    margin-top: 20px;
-  }
-  .color-button button {
-    background: white;
-    color: black;
-    border: 2px solid #ccc;
-    border-radius: 10px;
-    padding: 12px;
-    font-size: 16px;
-  }
-  input[type="text"] {
+  .input-list input {
     width: 80%;
     padding: 8px;
     margin: 5px;
-    border-radius: 6px;
+    border: 1px solid #ccc;
+    border-radius: 8px;
+    text-align: center;
+  }
+  .color-word {
+    font-size: 2.5rem;
+    margin: 30px 0;
+    font-weight: bold;
+  }
+  .color-buttons button {
+    background-color: white;
+    color: black;
     border: 1px solid #aaa;
+    border-radius: 10px;
+    padding: 10px 20px;
+    margin: 8px;
+    cursor: pointer;
+    transition: 0.2s;
+  }
+  .color-buttons button:hover {
+    background-color: #e8e8e8;
+  }
+  ul {
+    text-align: left;
+    display: inline-block;
+    margin-top: 20px;
   }
 </style>
 </head>
 <body>
 
-<h1>調査２ 認知能力テスト</h1>
+<div class="container" id="main">
 
-<div id="section1" class="section">
-  <h3>(1) 単語リスト再生リスト</h3>
-  <p>説明文：これから、15個の単語が順番に一個づつ表示されます。それらを順番どおりでなくても良いので覚えているものだけ回答してください。メモを取らないようにお願いします。</p>
-  <button onclick="startWordTest()">スタート</button>
-  <div id="wordDisplay" class="word"></div>
-  <div id="wordInputArea" style="display:none;">
-    <p>説明文：単語は以上です。解答は表示されたのと同様に記入してください。</p>
-    <div id="inputs"></div>
-    <button onclick="submitWordAnswers()">解答完了</button>
-  </div>
-</div>
+  <h1>調査２ 認知能力テスト</h1>
+  <p>説明文：次に、認知能力に関するテストを行います。</p>
+  <button onclick="startSection1()">スタート</button>
 
-<div id="section2" class="section" style="display:none;">
-  <h3>(2) ストループ課題</h3>
-  <p>説明文：画面に色の名前が表示されます。文字の色（表示色）を答えてください。意味（文字の読み）ではなく、表示色を選んでください。なるべく素早く回答してください。しかし、間違えてしまうと二秒間回答できないので注意してください。</p>
-  
-  <!-- 🔽 ストループ課題用スタートボタン -->
-  <button id="stroopStartButton" onclick="beginStroop()">スタート</button>
-
-  <div id="stroopTestArea" style="display:none;">
-    <div id="stroopWord" class="word"></div>
-    <div class="color-button" id="colorButtons"></div>
-  </div>
-</div>
-
-<div id="section3" class="section" style="display:none;">
-  <h3>結果</h3>
-  <p>説明文：テストは以上です。ありがとうございました。あなたの結果は、以下の通りです。Googleフォームに結果を記入してください。</p>
-  <p>単語再生テストの正答率：<span id="wordScore"></span></p>
-  <p>ストループ課題の反応速度の平均タイム：<span id="stroopAvg"></span></p>
 </div>
 
 <script>
-/* ---------- 単語リスト再生 ---------- */
-const words = ["犬","机","空","花","川","時計","山","星","本","雲","学校","月","窓","椅子","紙"];
-let shuffledWords = [];
-let wordIndex = 0;
-let correctWords = [...words];
+const main = document.getElementById("main");
+
+// -------------------- Section 1 --------------------
+function startSection1() {
+  main.innerHTML = `
+    <h2>(1) 単語リスト再生リスト</h2>
+    <p>説明文：これから、10個の単語が順番に一個づつ表示されます。それらを順番どおりでなくても良いので覚えているものだけ回答してください。メモを取らないようにお願いします。</p>
+    <button onclick="startWordList()">スタート</button>
+  `;
+}
+
+const wordPool = ["りんご","電車","山","時計","花","本","犬","雲","学校","海","机","靴","鳥","月","川","車","森","椅子","鉛筆","星"];
+let wordList = [];
+let correctWordList = [];
 let userAnswers = [];
 
-function startWordTest() {
-  document.querySelector("#wordDisplay").textContent = "";
-  shuffledWords = [...words].sort(() => Math.random() - 0.5);
-  wordIndex = 0;
-  showNextWord();
+function startWordList() {
+  // 無作為に10個選ぶ
+  wordList = [];
+  const shuffled = [...wordPool].sort(()=>Math.random()-0.5);
+  wordList = shuffled.slice(0,10);
+  correctWordList = [...wordList];
+  main.innerHTML = `<div class="word" id="wordDisplay"></div>`;
+  let index = 0;
+
+  const showWord = () => {
+    if(index < wordList.length){
+      document.getElementById("wordDisplay").textContent = wordList[index];
+      index++;
+      setTimeout(showWord, 2000);
+    } else {
+      setTimeout(showAnswerInput, 3000);
+    }
+  };
+  showWord();
 }
 
-function showNextWord() {
-  if (wordIndex < shuffledWords.length) {
-    document.querySelector("#wordDisplay").textContent = shuffledWords[wordIndex];
-    wordIndex++;
-    setTimeout(showNextWord, 2000);
-  } else {
-    setTimeout(() => {
-      document.querySelector("#wordDisplay").textContent = "";
-      showWordInput();
-    }, 3000);
-  }
+function showAnswerInput() {
+  main.innerHTML = `
+    <p>説明文：単語は以上です。解答は表示されたものと同様に記入してください。</p>
+    <div class="input-list">
+      ${Array(10).fill(0).map((_,i)=>`<input type="text" id="ans${i}" placeholder="単語${i+1}">`).join("")}
+    </div>
+    <button onclick="checkWordAnswers()">解答完了</button>
+  `;
 }
 
-function showWordInput() {
-  const inputArea = document.querySelector("#wordInputArea");
-  inputArea.style.display = "block";
-  const inputContainer = document.querySelector("#inputs");
-  inputContainer.innerHTML = "";
-  for (let i = 0; i < 15; i++) {
-    inputContainer.innerHTML += `<input type="text" id="ans${i}" placeholder="単語${i+1}"><br>`;
-  }
-}
-
-function submitWordAnswers() {
+function checkWordAnswers() {
   userAnswers = [];
-  for (let i = 0; i < 15; i++) {
-    userAnswers.push(document.querySelector(`#ans${i}`).value.trim());
+  for(let i=0;i<10;i++){
+    userAnswers.push(document.getElementById(`ans${i}`).value.trim());
   }
-  let correctCount = userAnswers.filter(ans => correctWords.includes(ans)).length;
-  wordScore = Math.round((correctCount / 15) * 100);
-  document.querySelector("#section1").style.display = "none";
-  document.querySelector("#section2").style.display = "block";
-}
-
-/* ---------- ストループ課題 ---------- */
-const colors = ["赤","青","黄","緑","紫","茶","ピンク","オレンジ"];
-const colorMap = {
-  "赤":"red","青":"blue","黄":"gold","緑":"green","紫":"purple",
-  "茶":"brown","ピンク":"pink","オレンジ":"orange"
-};
-let stroopCount = 0;
-let stroopStartTime;
-let totalTime = 0;
-let stroopDisabled = false;
-
-function beginStroop() {
-  document.querySelector("#stroopStartButton").style.display = "none";
-  document.querySelector("#stroopTestArea").style.display = "block";
-  startStroopTest();
-}
-
-function startStroopTest() {
-  const btnContainer = document.querySelector("#colorButtons");
-  btnContainer.innerHTML = "";
-  colors.forEach(c=>{
-    const btn = document.createElement("button");
-    btn.textContent = c;
-    btn.onclick = ()=>checkStroopAnswer(c);
-    btnContainer.appendChild(btn);
+  let correctCount = 0;
+  userAnswers.forEach(ans=>{
+    if(correctWordList.includes(ans)) correctCount++;
   });
-  nextStroop();
+  window.wordScore = correctCount / 10 * 100;
+  startSection2();
 }
 
-function nextStroop() {
-  if (stroopCount >= 10) {
-    finishTest();
-    return;
-  }
-  const word = colors[Math.floor(Math.random()*7)];
+// -------------------- Section 2 --------------------
+const colorNames = ["赤","青","黄","緑","紫","茶","ピンク","オレンジ"];
+const colorValues = {
+  "赤":"red", "青":"blue", "黄":"gold", "緑":"green",
+  "紫":"purple", "茶":"brown", "ピンク":"pink", "オレンジ":"orange"
+};
+let stroopIndex = 0;
+let stroopScore = 0;
+let stroopErrors = 0;
+let stroopTimes = [];
+let lastTime = 0;
+let lock = false;
+
+function startSection2() {
+  main.innerHTML = `
+    <h2>(2) ストループ課題</h2>
+    <p>説明文：画面に色の名前が表示されます。文字の色（表示色）を答えてください。意味（文字の読み）ではなく、表示色を選んでください。なるべく素早く回答してください。しかし、間違えてしまうと二秒間回答できないので注意してください。</p>
+    <div class="color-word" style="color:blue;">赤</div>
+    <p>説明文：上の例題では、答えは「赤」ではなく、表示色の「青」です。</p>
+    <button onclick="startStroop()">スタート</button>
+  `;
+}
+
+function startStroop() {
+  stroopIndex = 0;
+  stroopScore = 0;
+  stroopErrors = 0;
+  stroopTimes = [];
+  showStroopTrial();
+}
+
+function showStroopTrial() {
+  if(stroopIndex >= 10) return showResult();
+
+  const text = colorNames[Math.floor(Math.random()*colorNames.length)];
   let color;
-  do { color = colors[Math.floor(Math.random()*7)]; } while (color===word);
-  const display = document.querySelector("#stroopWord");
-  display.textContent = word;
-  display.style.color = colorMap[color];
-  display.dataset.correct = color;
-  stroopStartTime = Date.now();
+  do {
+    color = colorNames[Math.floor(Math.random()*colorNames.length)];
+  } while(color === text);
+
+  main.innerHTML = `
+    <h2>(2) ストループ課題</h2>
+    <div class="color-word" id="stroopWord" style="color:${colorValues[color]};">${text}</div>
+    <div class="color-buttons">
+      ${colorNames.map(c=>`<button onclick="checkStroop('${color}','${c}')">${c}</button>`).join("")}
+    </div>
+  `;
+  lastTime = performance.now();
 }
 
-function checkStroopAnswer(selected) {
-  if (stroopDisabled) return;
-  const display = document.querySelector("#stroopWord");
-  const correct = display.dataset.correct;
-  const responseTime = Date.now() - stroopStartTime;
-  if (selected === correct) {
-    totalTime += responseTime;
-    stroopCount++;
-    nextStroop();
+function checkStroop(correctColor, selectedColor) {
+  if(lock) return;
+  const now = performance.now();
+  const rt = (now - lastTime) / 1000;
+  if(selectedColor === correctColor){
+    stroopScore++;
+    stroopTimes.push(rt);
+    stroopIndex++;
+    showStroopTrial();
   } else {
-    stroopDisabled = true;
-    display.textContent = "× 間違い！";
-    setTimeout(()=>{
-      stroopDisabled = false;
-      nextStroop();
-    },2000);
+    stroopErrors++;
+    lock = true;
+    setTimeout(()=>{lock=false;},2000);
   }
 }
 
-function finishTest() {
-  document.querySelector("#section2").style.display = "none";
-  document.querySelector("#section3").style.display = "block";
-  document.querySelector("#wordScore").textContent = wordScore + "%";
-  document.querySelector("#stroopAvg").textContent = Math.round(totalTime/10) + " ms";
+function showResult() {
+  const avgTime = stroopTimes.reduce((a,b)=>a+b,0)/stroopTimes.length;
+  main.innerHTML = `
+    <h2>テストは以上です。ありがとうございました。</h2>
+    <p>説明文：テストは以上です。ありがとうございました。以下が結果です。先ほどのアンケートに戻り、結果を記入してください。結果が記入し終わったら、このサイトは閉じていただいて構いません。</p>
+    <ul>
+      <li>単語リスト再生テストの正答率：${window.wordScore.toFixed(1)}%</li>
+      <li>ストループ課題の誤答回数：${stroopErrors}回</li>
+      <li>ストループ課題の平均解答時間：${avgTime.toFixed(2)}秒</li>
+    </ul>
+  `;
 }
 </script>
+
 </body>
 </html>
-
